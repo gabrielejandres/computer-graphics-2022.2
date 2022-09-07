@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <title>2D Sierpinski Gasket</title>
+    </head>
+
+    <body onload="init()">
+        <canvas id="gl-canvas" width="512" height="512">
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+
+        <div>
+            Subdivisions 0
+            <input
+                id="slider"
+                type="range"
+                min="0"
+                max="7"
+                step="1"
+                value="5"
+            />
+            7
+        </div>
+
+        <br />
+        <input
+            name="txtboxDiv"
+            id="div"
+            value="5"
+            style="width: 40px"
+            type="text"
+        />
+        <input
+            name="btnDiv"
+            type="button"
+            value="Number of Divisions: [0,7]"
+            onclick="clickCallBack()"
+        />
+
+        <br />
+        <input
+            name="txtboxRot"
+            id="ang"
+            value="45"
+            style="width: 40px"
+            type="text"
+        />
+        <input
+            name="btnRot"
+            type="button"
+            value="Rotation Angle: [-360,360]"
+            onclick="clickCallBack()"
+        />
+
+        <br />
+        <input
+            id="twist"
+            name="twist"
+            type="checkbox"
+            checked="true"
+            required="required"
+            onclick="clickCallBack()"
+        />
+        Twist?
+
+        <input
+            id="gpu"
+            name="gpu"
+            type="checkbox"
+            checked
+            required="required"
+            onclick="clickCallBack()"
+        />
+        GPU(Rotate)?
+
+        <input
+            id="fill"
+            name="fill"
+            type="checkbox"
+            checked
+            required="required"
+            onclick="clickCallBack()"
+        />
+        Fill?
+
+        <input
+            id="spin"
+            name="spin"
+            type="checkbox"
+            required="required"
+            onclick="clickCallBack()"
+        />
+        Spin Fast?
+
+        <p>Click the button to display the time.</p>
+        <button onclick="getElementById('demo').innerHTML=Date()">
+            What is the time?
+        </button>
+        <p id="demo"></p>
+
+        <script
+            type="text/javascript"
+            src="https://lcg.ufrj.br/js/ip.php"
+        ></script>
+
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+            uniform mat4 Projection, ModelView;
+            uniform float theta;
+            uniform bool twist;
+            uniform bool gpu;
+            uniform vec2 origin;
+
+            // opengl stores matrices by column.
+            mat4 translate(vec2 delta) {
+                return mat4(
+                    vec4(1.0, 0.0, 0.0, 0.0),
+                    vec4(0.0, 1.0, 0.0, 0.0),
+                    vec4(0.0, 0.0, 1.0, 0.0),
+                    vec4(delta, 0.0, 1.0));
+            }
+
+            mat4 rotate(float ang) {
+                float c = cos(ang);
+                float s = sin(ang);
+                return mat4(
+                    c,   s,   0.0, 0.0,
+                    -s,  c,   0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0);
+            }
+
+            void main() {
+                if ( gpu ) {
+                    float angle = radians(theta);
+                    if ( twist ) {
+                        // Swizzling: take only the x and y coordinates
+                        // vec2 pos = vec2(vPosition[0], vPosition[1]);
+                        // https://www.opengl.org/wiki/Data_Type_(GLSL)#Swizzling
+                        angle += length(vPosition.xy-origin);
+                    }
+                    mat4 PM = Projection * translate(origin) * rotate(angle) * translate(-origin);
+                    gl_Position = PM * vPosition;
+                } else {
+                    gl_Position = Projection * vPosition;
+                }
+            }
+        </script>
+
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            uniform vec4 fColor;
+
+            void main() {
+                gl_FragColor = fColor;
+            }
+        </script>
+
+        <script
+            type="text/javascript"
+            src="webgl-utils.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="initShaders.js"
+        ></script>
+        <script type="text/javascript" src="MV.js"></script>
+        <script type="text/javascript" src="test.js"></script>
+    </body>
+</html>
