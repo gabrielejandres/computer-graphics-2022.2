@@ -72,31 +72,73 @@ function getVertex(i) {
  * @param {CanvasRenderingContext2D} ctx canvas context.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
  */
-function draw(ctx) {
-  // ctx.arc(0, 0, 5, 0, 2 * Math.PI); // Point of transform origin
+function draw(ctx, angle) {
+    // Desenha o background
+    ctx.fillStyle = 'rgba(0, 204, 204, 1)';
+    ctx.rect(0, 0, w, h);
+    ctx.fill();
+  
+    let squareSize = 80;
+    let borderWidth = 8;
+    let firstVertex = 'red';
+    let secondVertex = 'white';
+    let thirdVertex = 'blue';
+    let fourthVertex = 'green';
+  
+    let [x, y] = mapToViewport(...getVertex(5).map((x) => x));
+    console.log(x, y);
+  
+    // Non-rotated 
+    // Create a linear gradient
+    // The start gradient point is at x=20, y=0
+    // The end gradient point is at x=220, y=0
+    const gradient = ctx.createLinearGradient(x, y, x + squareSize, y + squareSize);
 
-  // Desenha o background
-  ctx.fillStyle = "rgba(0, 204, 204, 1)";
-  ctx.rect(0, 0, w, h);
-  ctx.fill();
+    // Add three color stops
+    gradient.addColorStop(0, firstVertex);
+    gradient.addColorStop(1, thirdVertex);
 
-  let angle = 10;
-  let squareSize = 80;
-  let x = w / 2 - squareSize / 2; 
-  let y = h / 2 - squareSize / 2;
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x, y, squareSize, squareSize);
+    ctx.lineWidth = borderWidth;
+    ctx.strokeStyle = 'rgba(111, 115, 120, 1)';
+    ctx.strokeRect(x, y, squareSize, squareSize);
+  
+    // Matrix transformation
+    ctx.translate(x, y); // First translate the context to the center you wish to rotate around.
+    ctx.rotate(angle * Math.PI / 180); // Then do the actual rotation.
+    ctx.translate(-x, -y); // Then translate the context back.
 
-  // Non-rotated 
-  ctx.fillStyle = 'gray';
-  ctx.fillRect(x, y, squareSize, squareSize);
+    // Vertexs
+    for (let i = 0; i < numPoints; i++) {
+      if (i == 3 || i == 4) continue;
+      let [x, y] = mapToViewport(...getVertex(i).map((x) => x));
 
-  // Matrix transformation
-  ctx.translate(x, y);
-  ctx.rotate(angle * Math.PI / 180);
-  ctx.translate(-x, -y);
+      ctx.beginPath();
 
-  // Rotated rectangle
-  ctx.fillStyle = 'red';
-  ctx.fillRect(x, y, squareSize, squareSize);
+      if (i == 0) {
+        ctx.fillStyle = fourthVertex;
+        ctx.arc(x + borderWidth / 2, y - borderWidth / 2, 4, 0, 2 * Math.PI);
+      }
+
+      if (i == 5) {
+        ctx.fillStyle = firstVertex;
+        ctx.arc(x + borderWidth / 2, y + borderWidth / 2, 4, 0, 2 * Math.PI);
+      }
+
+      if (i == 1) {
+        ctx.fillStyle = thirdVertex;
+        ctx.arc(x - borderWidth / 2, y - borderWidth / 2, 4, 0, 2 * Math.PI);
+      }
+
+      if (i == 2) {
+        ctx.fillStyle = secondVertex;
+        ctx.arc(x - borderWidth / 2, y + borderWidth / 2, 4, 0, 2 * Math.PI);
+      }
+
+      ctx.fill();
+      ctx.closePath();
+    }
 
   // ctx.translate(x, y); // First translate the context to the center you wish to rotate around.
   // ctx.rotate(angle * Math.PI/180); // Then do the actual rotation.
@@ -135,28 +177,28 @@ function mainEntrance() {
   w = canvasElement.width;
   h = canvasElement.height;
 
-  draw(ctx);
+   /**
+    * A closure to set up an animation loop in which the
+    * scale grows by "increment" each frame.
+    * @global
+    * @function
+    */
+   var runanimation = (() => {
+  
+       var angle = 0;
 
-  //  /**
-  //   * A closure to set up an animation loop in which the
-  //   * scale grows by "increment" each frame.
-  //   * @global
-  //   * @function
-  //   */
-  //  var runanimation = (() => {
-  //
-  //      var increment = 0.05;
+       return () => {
+           draw(ctx, angle);
+           angle += 1;
+           if (angle === 360) angle = 0;
 
-  //      return () => {
-  //          draw(ctx, scale);
-  //          scale += increment;
-  //          if (scale >= 1.5 || scale <= 0.5) increment = -increment;
+           // request that the browser calls runanimation() again "as soon as it can"
+           setTimeout(() => {
+            requestAnimationFrame(runanimation);
+          }, "10000000000000");
+       };
+   })();
 
-  //          // request that the browser calls runanimation() again "as soon as it can"
-  //          requestAnimationFrame(runanimation);
-  //      };
-  //  })();
-
-  //  // draw!
-  //  runanimation();
+   // draw!
+   runanimation();
 }
