@@ -189,13 +189,10 @@ function mainEntrance() {
 
        return () => {
            draw(ctx, angle);
-           angle += 1;
-           if (angle === 360) angle = 0;
+           angle += Math.PI / 360;
+           if (angle >= Math.PI/2) angle -= Math.PI / 360;
 
-           // request that the browser calls runanimation() again "as soon as it can"
-           setTimeout(() => {
-            requestAnimationFrame(runanimation);
-          }, "10000000000000");
+           requestAnimationFrame(runanimation);
        };
    })();
 
