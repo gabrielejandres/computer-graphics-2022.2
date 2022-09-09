@@ -72,42 +72,32 @@ function getVertex(i) {
  * @param {CanvasRenderingContext2D} ctx canvas context.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
  */
-function draw(ctx, angle) {
+function draw(ctx, angle, vertexIndex = 5, complementaryIndex = 1) {
     // Desenha o background
     ctx.fillStyle = 'rgba(0, 204, 204, 1)';
     ctx.rect(0, 0, w, h);
     ctx.fill();
   
     let squareSize = 80;
-    let borderWidth = 8;
-    let firstVertex = 'red';
-    let secondVertex = 'white';
-    let thirdVertex = 'blue';
-    let fourthVertex = 'green';
+    let borderWidth = 5;
+    let colors = {
+      5: 'red',
+      2: 'white',
+      1: 'blue',
+      0: 'green'
+    };
   
-    let [x, y] = mapToViewport(...getVertex(5).map((x) => x));
-    console.log(x, y);
+    let [x, y] = mapToViewport(...getVertex(vertexIndex).map((x) => x));
   
-    // Non-rotated 
-    // Create a linear gradient
-    // The start gradient point is at x=20, y=0
-    // The end gradient point is at x=220, y=0
-    const gradient = ctx.createLinearGradient(x, y, x + squareSize, y + squareSize);
-
-    // Add three color stops
-    gradient.addColorStop(0, firstVertex);
-    gradient.addColorStop(1, thirdVertex);
+    const gradient = ctx.createLinearGradient(x, y, x + squareSize, y + squareSize); // Create a linear gradient where the start gradient point is at x, y and the end gradient point is at x + squareSize, y + squareSize
+    gradient.addColorStop(0, colors[vertexIndex]);
+    gradient.addColorStop(1, colors[complementaryIndex]);
 
     ctx.fillStyle = gradient;
     ctx.fillRect(x, y, squareSize, squareSize);
     ctx.lineWidth = borderWidth;
     ctx.strokeStyle = 'rgba(111, 115, 120, 1)';
     ctx.strokeRect(x, y, squareSize, squareSize);
-  
-    // Matrix transformation
-    ctx.translate(x, y); // First translate the context to the center you wish to rotate around.
-    ctx.rotate(angle * Math.PI / 180); // Then do the actual rotation.
-    ctx.translate(-x, -y); // Then translate the context back.
 
     // Vertexs
     for (let i = 0; i < numPoints; i++) {
@@ -115,51 +105,16 @@ function draw(ctx, angle) {
       let [x, y] = mapToViewport(...getVertex(i).map((x) => x));
 
       ctx.beginPath();
-
-      if (i == 0) {
-        ctx.fillStyle = fourthVertex;
-        ctx.arc(x + borderWidth / 2, y - borderWidth / 2, 4, 0, 2 * Math.PI);
-      }
-
-      if (i == 5) {
-        ctx.fillStyle = firstVertex;
-        ctx.arc(x + borderWidth / 2, y + borderWidth / 2, 4, 0, 2 * Math.PI);
-      }
-
-      if (i == 1) {
-        ctx.fillStyle = thirdVertex;
-        ctx.arc(x - borderWidth / 2, y - borderWidth / 2, 4, 0, 2 * Math.PI);
-      }
-
-      if (i == 2) {
-        ctx.fillStyle = secondVertex;
-        ctx.arc(x - borderWidth / 2, y + borderWidth / 2, 4, 0, 2 * Math.PI);
-      }
-
+      ctx.fillStyle = colors[i];
+      ctx.arc(x, y, 4, 0, 2 * Math.PI);
       ctx.fill();
       ctx.closePath();
     }
 
-  // ctx.translate(x, y); // First translate the context to the center you wish to rotate around.
-  // ctx.rotate(angle * Math.PI/180); // Then do the actual rotation.
-  // ctx.translate(-x,-y); // Then translate the context back.
-
-  // Desenha o quadrado
-  // ctx.beginPath();
-  // for (let i = 0; i < numPoints; i++) {
-  //   if (i == 3 || i == 4) continue;
-  //   let [x, y] = mapToViewport(...getVertex(i).map((x) => x));
-  //   console.log("dentro do for", i, x, y);
-  //   if (i == 0) ctx.moveTo(x, y);
-  //   else ctx.lineTo(x, y);
-  //   // ctx.arc(x, y, 4, 0, 2 * Math.PI);
-  //   // ctx.fill();
-  // }
-  // ctx.closePath();
-
-  // // the fill color
-  // ctx.fillStyle = "red";
-  // ctx.fill();
+    // Matrix transformation
+    ctx.translate(x, y); // First translate the context to the center you wish to rotate around.
+    ctx.rotate(angle * Math.PI / 180); // Then do the actual rotation.
+    ctx.translate(-x, -y); // Then translate the context back.
 }
 
 /**
@@ -173,9 +128,35 @@ function mainEntrance() {
   // retrieve <canvas> element
   var canvasElement = document.querySelector("#theCanvas");
   var ctx = canvasElement.getContext("2d");
+  let vertexIndex, complementaryIndex;
 
   w = canvasElement.width;
   h = canvasElement.height;
+
+  document.addEventListener('keydown', (event) => {
+    switch (event.code) {
+      case "KeyR":
+        console.log(event.key, "was pressed");
+        vertexIndex = 5;
+        complementaryIndex = 1;
+        break;
+      case "KeyG":
+        console.log(event.key, "was pressed");
+        vertexIndex = 0;
+        complementaryIndex = 2;
+        break;
+      case "KeyB":
+        console.log(event.key, "was pressed");
+        vertexIndex = 1;
+        complementaryIndex = 5;
+        break;
+      case "KeyW":
+        console.log(event.key, "was pressed");
+        vertexIndex = 2;
+        complementaryIndex = 0;
+        break;
+    }
+  });
 
    /**
     * A closure to set up an animation loop in which the
@@ -184,14 +165,11 @@ function mainEntrance() {
     * @function
     */
    var runanimation = (() => {
-  
        var angle = 0;
-
        return () => {
-           draw(ctx, angle);
-           angle += Math.PI / 360;
-           if (angle >= Math.PI/2) angle -= Math.PI / 360;
-
+           draw(ctx, angle, vertexIndex, complementaryIndex);
+           angle -= Math.PI / 360;
+           if (angle <= -Math.PI / 2) angle += Math.PI / 360;
            requestAnimationFrame(runanimation);
        };
    })();
