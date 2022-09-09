@@ -79,7 +79,7 @@ function draw(ctx, angle, vertexIndex = 5, complementaryIndex = 1) {
     ctx.fill();
   
     let squareSize = 80;
-    let borderWidth = 5;
+    let borderWidth = 6;
     let colors = {
       5: 'red',
       2: 'white',
@@ -88,18 +88,29 @@ function draw(ctx, angle, vertexIndex = 5, complementaryIndex = 1) {
     };
   
     let [x, y] = mapToViewport(...getVertex(vertexIndex).map((x) => x));
-  
+
     const gradient = ctx.createLinearGradient(x, y, x + squareSize, y + squareSize); // Create a linear gradient where the start gradient point is at x, y and the end gradient point is at x + squareSize, y + squareSize
     gradient.addColorStop(0, colors[vertexIndex]);
     gradient.addColorStop(1, colors[complementaryIndex]);
 
+    // Draw square
+    ctx.beginPath();
+    for (let i = 0; i < numPoints; i++) {
+      if (i == 3 || i == 4) continue;
+      let [x, y] = mapToViewport(...getVertex(i).map((x) => x));
+      if (i == 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
     ctx.fillStyle = gradient;
-    ctx.fillRect(x, y, squareSize, squareSize);
+    ctx.fill();
+
+    // Draw border
     ctx.lineWidth = borderWidth;
     ctx.strokeStyle = 'rgba(111, 115, 120, 1)';
-    ctx.strokeRect(x, y, squareSize, squareSize);
-
-    // Vertexs
+    ctx.stroke();
+    
+    // Draw vertexs
     for (let i = 0; i < numPoints; i++) {
       if (i == 3 || i == 4) continue;
       let [x, y] = mapToViewport(...getVertex(i).map((x) => x));
