@@ -72,7 +72,7 @@ function getVertex(i) {
  * @param {CanvasRenderingContext2D} ctx canvas context.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
  */
-function draw(ctx, angle, vertexIndex = 5, complementaryIndex = 1) {
+function draw(ctx, angle, vertexIndex = 5) {
     // Desenha o background
     ctx.fillStyle = 'rgba(0, 204, 204, 1)';
     ctx.rect(0, 0, w, h);
@@ -89,9 +89,19 @@ function draw(ctx, angle, vertexIndex = 5, complementaryIndex = 1) {
   
     let [x, y] = mapToViewport(...getVertex(vertexIndex).map((x) => x));
 
-    const gradient = ctx.createLinearGradient(x, y, x + squareSize, y + squareSize); // Create a linear gradient where the start gradient point is at x, y and the end gradient point is at x + squareSize, y + squareSize
-    gradient.addColorStop(0, colors[vertexIndex]);
-    gradient.addColorStop(1, colors[complementaryIndex]);
+    let gradient;
+
+    // Create gradients according to vertexs indices
+    if (vertexIndex == 1 || vertexIndex == 5) {
+      gradient = ctx.createLinearGradient(160, 160, 160 + squareSize, 160 + squareSize); // Create a linear gradient where the start gradient point is at x, y and the end gradient point is at x + squareSize, y + squareSize
+      gradient.addColorStop(0, colors[5]);
+      gradient.addColorStop(1, colors[1]);
+    } else {
+      gradient = ctx.createLinearGradient(160, 160, 160 + squareSize, 160 + Math.sin(-Math.PI/2) * squareSize); // Create a linear gradient where the start gradient point is at x, y and the end gradient point is at x + squareSize, y + squareSize
+      gradient.addColorStop(0, colors[0]);
+      gradient.addColorStop(0.5, colors[2]);
+      gradient.addColorStop(1, colors[2]);
+    }
 
     // Draw square
     ctx.beginPath();
@@ -139,7 +149,7 @@ function mainEntrance() {
   // retrieve <canvas> element
   var canvasElement = document.querySelector("#theCanvas");
   var ctx = canvasElement.getContext("2d");
-  let vertexIndex, complementaryIndex;
+  let vertexIndex;
 
   w = canvasElement.width;
   h = canvasElement.height;
@@ -149,22 +159,18 @@ function mainEntrance() {
       case "KeyR":
         console.log(event.key, "was pressed");
         vertexIndex = 5;
-        complementaryIndex = 1;
         break;
       case "KeyG":
         console.log(event.key, "was pressed");
         vertexIndex = 0;
-        complementaryIndex = 2;
         break;
       case "KeyB":
         console.log(event.key, "was pressed");
         vertexIndex = 1;
-        complementaryIndex = 5;
         break;
       case "KeyW":
         console.log(event.key, "was pressed");
         vertexIndex = 2;
-        complementaryIndex = 0;
         break;
     }
   });
@@ -178,9 +184,9 @@ function mainEntrance() {
    var runanimation = (() => {
        var angle = 0;
        return () => {
-           draw(ctx, angle, vertexIndex, complementaryIndex);
-           angle -= Math.PI / 360;
-           if (angle <= -Math.PI / 2) angle += Math.PI / 360;
+           draw(ctx, angle, vertexIndex);
+           angle -= 2;
+           if (angle <= -4) angle += 2;
            requestAnimationFrame(runanimation);
        };
    })();
