@@ -14,7 +14,7 @@
  *
  * @author Gabriele Jandres Cavalcanti
  * @since 06/09/2022
- * @see <LINK OBSERVABLE/GITHUB>
+ * @see https://gabrielejandres.github.io/computer-graphics-2022.2/trab01/RotatingSquare.html
  */
 
 "use strict";
