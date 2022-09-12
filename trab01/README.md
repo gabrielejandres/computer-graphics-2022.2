@@ -1,4 +1,4 @@
 # Trabalho 01
 *Transformação com ponto fixo*
 
-<img src="gif.gif"/>
+<img src="transformations.gif"/>
