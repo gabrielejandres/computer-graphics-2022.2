@@ -149,27 +149,29 @@ function convexPolysIntersect(poly, poly2) {
   let i, j, p, q, r, s;
   let points1 = 0;
   let points2 = 0;
-  console.log(poly);
-  console.log(poly2);
-  // for each edge of poly.
+  // console.log(poly);
+  // console.log(poly2);
+  
+  // Para cada aresta do polígono 1
   for (i = 0; i < n; i++) {
     p = poly[i];
     q = poly[(i + 1) % n];
-    // for each edge of poly2.
+    // Para cada aresta do polígono 2
     for (j = 0; j < n2; j++) {
       r = poly2[j];
       s = poly2[(j + 1) % n2];
-      // check if the edges intersect.
+      // Verificamos se as arestas se intersectam
       if (vec2d.segmentsIntersect(p, q, r, s)) {
         return true;
-      } 
-      if (util2d.pointInConvexPoly(r, poly)) points1++;
+      } else {
+        if (util2d.pointInConvexPoly(r, poly)) points1++;
+      }
     }
     if (util2d.pointInConvexPoly(p, poly2)) points2++;
   }
 
   // Caso em que as arestas nao se intersectam e um poligono esta dentro do outro
-  if (points1 >= 3 || points2 >= 3) return true;
+  // if (points1 >= 3 || points2 >= 3) return true;
 
   return false;
 }
@@ -210,16 +212,28 @@ function circleCircleIntersect(center1, radius1, center2, radius2) {}
  * @returns {Array<Array<Number,Number>>} a rectangle (a polygon).
  * @see <img src="../cRv2l.png" width="320">
  */
+// function makeRectangle(center, u, size) {
+//   const v = [-u[1], u[0]];
+//   const halfSize = size / 2;
+//   return [
+//     vec2d.add([], center, [halfSize, 0]),
+//     vec2d.add([], center, [0, halfSize]),
+//     vec2d.add([], center, [-halfSize, 0]),
+//     vec2d.add([], center, [0, -halfSize]),
+//   ];
+// }
+
 function makeRectangle(center, u, size) {
-  const v = vec2.rotate([], u, Math.PI / 2);
+  const v = [-u[1], u[0]];
   const halfSize = size / 2;
   return [
-    vec2.add([], center, vec2.scale([], u, halfSize)),
-    vec2.add([], center, vec2.scale([], v, halfSize)),
-    vec2.sub([], center, vec2.scale([], u, halfSize)),
-    vec2.sub([], center, vec2.scale([], v, halfSize)),
+    vec2d.add([], center, vec2d.scale([], u, halfSize)),
+    vec2d.add([], center, vec2d.scale([], v, halfSize)),
+    vec2d.add([], center, vec2d.scale([], u, -halfSize)),
+    vec2d.add([], center, vec2d.scale([], v, -halfSize)),
   ];
 }
+
 const vScale = curry((sc, v) => [v[0] * sc, v[1] * sc]);
 const vAdd = curry((v1, v2) => [v1[0] + v2[0], v1[1] + v2[1]]);
 const vMidpoint = curry((v, v2) => vScale(0.5, vAdd(v, v2)));
@@ -271,6 +285,35 @@ function midPoints(poly) {
   let sel = null;
   let prevMouse = null;
 
+    const rect = [
+    { center: [350, 100], u: [1, 0], size: 100, color: "black" },
+    { center: [100, 200], u: [1, 0], size: 100, color: "black" },
+    { center: [400, 200], u: [1, 0], size: 100, color: "black" },
+  ];
+
+    function makePtsRect() {
+    for (let t of rect) {
+      t.poly = makeRectangle(t.center, t.u, t.size);
+      vec2d.mul([], t.center, t.u);
+      vec2d.normalize(t.u, t.u);
+      t.anchors = [t.center, t.u];
+    }
+  }
+
+  //       let mouse = [e.offsetX, e.offsetY];
+//       let [r, ianchor] = sel;
+//       
+//       prevMouse = mouse;
+//       if (ianchor == 0) {
+//         vec2d.add(r.center, r.center, delta);
+//       } else {
+//         vec2d.add(r.u, r.u, delta);
+//         vec2d.normalize(r.u, r.u);
+
+  makePtsRect();
+  let selRect = null;
+  let prevMouseRect = null;
+
   const update = () => {
     fillCanvas(ctx, w, h);
 
@@ -288,6 +331,34 @@ function midPoints(poly) {
     }
 
     for (let t of iso) {
+      ctx.fillStyle = ctx.strokeStyle = t.color;
+      for (let p of t.anchors) {
+        ctx.beginPath();
+        ctx.arc(...p, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.beginPath();
+      for (let p of t.poly) {
+        ctx.lineTo(...p);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    }
+
+    // rect âˆ© rect
+    for (let t1 of rect) {
+      t1.color = "black";
+      for (let t2 of rect) {
+        if (t1 == t2) continue;
+        let intersect = convexPolysIntersect(t1.poly, t2.poly);
+        if (intersect) {
+          t1.color = "red";
+          t2.color = "red";
+        }
+      }
+    }
+
+    for (let t of rect) {
       ctx.fillStyle = ctx.strokeStyle = t.color;
       for (let p of t.anchors) {
         ctx.beginPath();
