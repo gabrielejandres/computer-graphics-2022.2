@@ -212,27 +212,37 @@ function circleCircleIntersect(center1, radius1, center2, radius2) {}
  * @returns {Array<Array<Number,Number>>} a rectangle (a polygon).
  * @see <img src="../cRv2l.png" width="320">
  */
-// function makeRectangle(center, u, size) {
-//   const v = [-u[1], u[0]];
-//   const halfSize = size / 2;
-//   return [
-//     vec2d.add([], center, [halfSize, 0]),
-//     vec2d.add([], center, [0, halfSize]),
-//     vec2d.add([], center, [-halfSize, 0]),
-//     vec2d.add([], center, [0, -halfSize]),
-//   ];
-// }
-
 function makeRectangle(center, u, size) {
   const v = [-u[1], u[0]];
   const halfSize = size / 2;
   return [
-    vec2d.add([], center, vec2d.scale([], u, halfSize)),
-    vec2d.add([], center, vec2d.scale([], v, halfSize)),
-    vec2d.add([], center, vec2d.scale([], u, -halfSize)),
-    vec2d.add([], center, vec2d.scale([], v, -halfSize)),
+    vec2d.add([], center, [halfSize, 0]),
+    vec2d.add([], center, [0, halfSize]),
+    vec2d.add([], center, [-halfSize, 0]),
+    vec2d.add([], center, [0, -halfSize]),
   ];
 }
+
+function makeCircle(center, radius) {
+  const n = 32;
+  const poly = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i * 2 * Math.PI) / n;
+    poly.push([center[0] + radius * Math.cos(a), center[1] + radius * Math.sin(a)]);
+  }
+  return poly;
+}
+
+// function makeRectangle(center, u, size) {
+//   const v = [-u[1], u[0]];
+//   const halfSize = size / 2;
+//   return [
+//     vec2d.add([], center, vec2d.scale([], u, halfSize)),
+//     vec2d.add([], center, vec2d.scale([], v, halfSize)),
+//     vec2d.add([], center, vec2d.scale([], u, -halfSize)),
+//     vec2d.add([], center, vec2d.scale([], v, -halfSize)),
+//   ];
+// }
 
 const vScale = curry((sc, v) => [v[0] * sc, v[1] * sc]);
 const vAdd = curry((v1, v2) => [v1[0] + v2[0], v1[1] + v2[1]]);
@@ -294,21 +304,9 @@ function midPoints(poly) {
     function makePtsRect() {
     for (let t of rect) {
       t.poly = makeRectangle(t.center, t.u, t.size);
-      vec2d.mul([], t.center, t.u);
-      vec2d.normalize(t.u, t.u);
       t.anchors = [t.center, t.u];
     }
   }
-
-  //       let mouse = [e.offsetX, e.offsetY];
-//       let [r, ianchor] = sel;
-//       
-//       prevMouse = mouse;
-//       if (ianchor == 0) {
-//         vec2d.add(r.center, r.center, delta);
-//       } else {
-//         vec2d.add(r.u, r.u, delta);
-//         vec2d.normalize(r.u, r.u);
 
   makePtsRect();
   let selRect = null;
@@ -350,7 +348,7 @@ function midPoints(poly) {
       t1.color = "black";
       for (let t2 of rect) {
         if (t1 == t2) continue;
-        let intersect = convexPolysIntersect(t1.poly, t2.poly);
+        let intersect = convexPolysIntersect(t1.poly, t2.poly); // TODO: adicionar um parametro pra saber qual eh  poligono
         if (intersect) {
           t1.color = "red";
           t2.color = "red";
@@ -360,7 +358,14 @@ function midPoints(poly) {
 
     for (let t of rect) {
       ctx.fillStyle = ctx.strokeStyle = t.color;
-      for (let p of t.anchors) {
+
+      // Desenha o centro
+      ctx.beginPath();
+      ctx.arc(...t.center, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Desenha os pontos das laterais
+      for (let p of t.poly) {
         ctx.beginPath();
         ctx.arc(...p, 5, 0, Math.PI * 2);
         ctx.fill();
@@ -372,6 +377,30 @@ function midPoints(poly) {
       ctx.closePath();
       ctx.stroke();
     }
+
+    const circ = [
+      { center: [200, 430], radius: 50, color: "black" },
+      { center: [80, 380], radius: 50, color: "black" },
+      { center: [350, 430], radius: 50, color: "black" },
+    ];
+
+    for (let c of circ) {
+      ctx.fillStyle = ctx.strokeStyle = c.color;
+      ctx.beginPath();
+      ctx.arc(...c.center, c.radius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Desenha o centro
+      ctx.beginPath();
+      ctx.arc(...c.center, 5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Desenha o controlador
+      ctx.beginPath();
+      ctx.arc(c.center[0] - c.radius, c.center[1], 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
   };
   update();
 
