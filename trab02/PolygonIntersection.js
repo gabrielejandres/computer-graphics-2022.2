@@ -28,7 +28,7 @@ const curry = fn => {
  */
 let vec2d = (function () {
   /**
-   * @member {Object} glvec2 an extended vec2 from gl-matrix.
+   * @member {Object} glvec2 an extended vec2d from gl-matrix.
    */
   let glvec2 = Object.assign({}, vec2);
   let glmat3 = mat3;
@@ -109,14 +109,38 @@ let vec2d = (function () {
  * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
  */
 function fillCanvas(ctx, w, h) {
-  ctx.fillStyle = "white";
-  ctx.strokeStyle = "gray";
+  ctx.fillStyle = "#EFEFEF";
+  ctx.strokeStyle = "#565656";
   ctx.lineWidth = 10;
-  // clear canvas.
+
+  // Clear canvas
   ctx.fillRect(0, 0, w, h);
-  // draw canvas border.
+
+  // Draw canvas border
   ctx.strokeRect(0, 0, w, h);
   ctx.lineWidth = 1;
+}
+
+/**
+ * Returns the 3 vertices of an isosceles triangle
+ * defined by the center point of its base and the
+ * opposite vertex.
+ * @param {Array<Number,Number>} basePoint base midpoint.
+ * @param {Array<Number,Number>} oppositeVertex opposite vertex.
+ * @return {Array<Array<Number,Number>, Array<Number,Number>, Array<Number,Number>>}
+ * an isosceles triangle (a convex polygon).
+ * @see https://en.wikipedia.org/wiki/Isosceles_triangle
+ * @see <img src="../Isosceles-Triangle.png" width="256">
+ */
+ function isosceles({ basePoint, oppositeVertex }) {
+  const u = vec2d.sub([], basePoint, oppositeVertex);
+  const v = [-u[1], u[0]];
+  const w = [u[1], -u[0]];
+  return [
+    oppositeVertex,
+    vec2d.add([], basePoint, v),
+    vec2d.add([], basePoint, w),
+  ];
 }
 
 /**
@@ -171,7 +195,7 @@ function convexPolysIntersect(poly, poly2) {
   }
 
   // Caso em que as arestas nao se intersectam e um poligono esta dentro do outro
-  // if (points1 >= 3 || points2 >= 3) return true;
+  if (points1 >= 3 || points2 >= 3) return true;
 
   return false;
 }
@@ -197,32 +221,6 @@ function convexPolyCircleIntersect(poly, center, radius) {}
  */
 function circleCircleIntersect(center1, radius1, center2, radius2) {}
 
-/**
- * Returns a rectangular polygon in the form of a vertex circulation,
- * given:
- * <ul>
- * <li>its center, </li>
- * <li>a vector (u) pointing from the center to the midpoint
- *       of one of its sides, </li>
- * <li>and the size of that side.</li>
- * </ul>
- * @param {Array<Number,Number>} center rectangle center.
- * @param {Array<Number,Number>} u orientation vector.
- * @param {Number} size side size.
- * @returns {Array<Array<Number,Number>>} a rectangle (a polygon).
- * @see <img src="../cRv2l.png" width="320">
- */
-// function makeRectangle(center, u, size) {
-//   const v = [-u[1], u[0]];
-//   const halfSize = size / 2;
-//   return [
-//     vec2d.add([], center, [halfSize, 0]),
-//     vec2d.add([], center, [0, halfSize]),
-//     vec2d.add([], center, [-halfSize, 0]),
-//     vec2d.add([], center, [0, -halfSize]),
-//   ];
-// }
-
 function makeRectangle(center, width, height) {
     return [
       vec2d.add([], center, [width, 0]),
@@ -230,16 +228,6 @@ function makeRectangle(center, width, height) {
       vec2d.add([], center, [-width, 0]),
       vec2d.add([], center, [0, -height])
     ];
-}
-
-function makeCircle(center, radius) {
-  const n = 32;
-  const poly = [];
-  for (let i = 0; i < n; i++) {
-    const a = (i * 2 * Math.PI) / n;
-    poly.push([center[0] + radius * Math.cos(a), center[1] + radius * Math.sin(a)]);
-  }
-  return poly;
 }
 
 // function makeRectangle(center, u, size) {
@@ -291,17 +279,30 @@ function getRectVertices(rect) {
  * <p>Triangulos sao descritos por objetos:</p>
  * { basePoint: [270, 350], oppositeVertex: [300, 200], color: "black" }
  *
- * @name isoscelesDemo
+ * @name polygonsDemo
  * @function
  */
-(function PolygonsDemo() {
+(function polygonsDemo() {
   const demo = document.querySelector("#theCanvas");
   const ctx = demo.getContext("2d");
   let [w, h] = [demo.clientWidth, demo.clientHeight];
+
   const iso = [
     { basePoint: [100, 100], oppositeVertex: [100, 50], color: "black" },
     { basePoint: [250, 100], oppositeVertex: [250, 50], color: "black" },
     { basePoint: [400, 100], oppositeVertex: [400, 50], color: "black" },
+  ];
+
+  const rect = [
+    { center: [100, 230], sides: "", width: 50, height: 80, color: "black" },
+    { center: [250, 230], sides: "", width: 50, height: 80, color: "black" },
+    { center: [400, 230], sides: "", width: 50, height: 80, color: "black" },
+  ];
+
+  const circ = [
+    { center: [100, 410], radius: 50, radiusControl: [100, 360], color: "black" },
+    { center: [250, 410], radius: 50, radiusControl: [250, 360], color: "black" },
+    { center: [400, 410], radius: 50, radiusControl: [400, 360], color: "black" },
   ];
 
   function makePts() {
@@ -309,30 +310,26 @@ function getRectVertices(rect) {
       t.poly = isosceles(t);
       t.anchors = [t.basePoint, t.oppositeVertex];
     }
+
+    for (let t of rect) {
+      t.sides = makeRectangle(t.center, t.width, t.height);
+      t.anchors = t.sides;
+    }
+  }
+
+  function updateRadius() {
+    for (let c of circ) {
+      c.radius = vec2d.len(vec2d.sub([], c.radiusControl, c.center));
+    }
   }
 
   makePts();
   let sel = null;
   let prevMouse = null;
 
-    const rect = [
-    { center: [100, 230], sides: "", width: 50, height: 80, color: "black" },
-    { center: [250, 230], sides: "", width: 50, height: 80, color: "black" },
-    { center: [400, 230], sides: "", width: 50, height: 80, color: "black" },
-  ];
-
-    function makePtsRect() {
-    for (let t of rect) {
-      t.sides = makeRectangle(t.center, t.width, t.height);
-    }
-  }
-
-  makePtsRect();
-  let selRect = null;
-  let prevMouseRect = null;
-
   const update = () => {
     fillCanvas(ctx, w, h);
+    updateRadius();
 
     // tri âˆ© tri
     for (let t1 of iso) {
@@ -363,17 +360,17 @@ function getRectVertices(rect) {
     }
 
     // rect âˆ© rect
-    // for (let t1 of rect) {
-    //   t1.color = "black";
-    //   for (let t2 of rect) {
-    //     if (t1 == t2) continue;
-    //     let intersect = convexPolysIntersect(t1.poly, t2.poly); // TODO: adicionar um parametro pra saber qual eh  poligono
-    //     if (intersect) {
-    //       t1.color = "red";
-    //       t2.color = "red";
-    //     }
-    //   }
-    // }
+    for (let t1 of rect) {
+      t1.color = "black";
+      for (let t2 of rect) {
+        if (t1 == t2) continue;
+        let intersect = convexPolysIntersect(t1.sides, t2.sides); // TODO: adicionar um parametro pra saber qual eh  poligono
+        if (intersect) {
+          t1.color = "red";
+          t2.color = "red";
+        }
+      }
+    }
 
     for (let t of rect) {
       ctx.fillStyle = ctx.strokeStyle = t.color;
@@ -399,14 +396,15 @@ function getRectVertices(rect) {
       ctx.stroke();
     }
 
-    const circ = [
-      { center: [100, 410], radius: 50, color: "black" },
-      { center: [250, 410], radius: 50, color: "black" },
-      { center: [400, 410], radius: 50, color: "black" },
-    ];
-
     for (let c of circ) {
       ctx.fillStyle = ctx.strokeStyle = c.color;
+
+      // Desenha o circulo
+      ctx.beginPath();
+      ctx.arc(...c.center, c.radius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      //let radius = vec2d.len(vec2d.sub([], c.radiusControl, c.center));
       ctx.beginPath();
       ctx.arc(...c.center, c.radius, 0, Math.PI * 2);
       ctx.stroke();
@@ -418,68 +416,171 @@ function getRectVertices(rect) {
       
       // Desenha o controlador
       ctx.beginPath();
-      ctx.arc(c.center[0], c.center[1] - c.radius, 5, 0, Math.PI * 2);
+      ctx.arc(...c.radiusControl, 5, 0, Math.PI * 2);
       ctx.fill();
     }
 
   };
   update();
 
-  demo.onmousemove = (e) => {
-    if (sel) {
-      let mouse = [e.offsetX, e.offsetY];
-      let [tri, ianchor] = sel;
-      let delta = vec2d.sub([], mouse, prevMouse);
-      prevMouse = mouse;
-      if (ianchor == 0) {
-        let v = vec2d.sub([], tri.oppositeVertex, tri.basePoint);
-        vec2d.add(tri.basePoint, tri.basePoint, delta);
-        vec2d.add(tri.oppositeVertex, tri.basePoint, v);
-      } else {
-        vec2d.add(tri.oppositeVertex, tri.oppositeVertex, delta);
-      }
-      makePts();
-      update();
-    }
+  // funcao do retangulo
+    const dragBase = (e, rectPoints) => {
+        let mouse = [e.offsetX, e.offsetY];
+        let delta = vec2d.sub([], mouse, prevMouse);
+        prevMouse = mouse;
+        vec2d.add(rectPoints[0], rectPoints[0], delta);
+        for (let i = 1; i < 5; i++) {
+            vec2d.add(rectPoints[i], rectPoints[i], delta);
+        }
+    };
+
+    const dragCircleCenter = (delta, circle) => {
+      vec2d.add(circle[0], circle[0], delta);
+      vec2d.add(circle[1], circle[1], delta);
   };
 
-  demo.onmousedown = (e) => {
-    sel = null;
-    const mouse = [e.offsetX, e.offsetY];
-    prevMouse = mouse;
-    for (let tri of iso) {
-      for (let [ianchor, p] of tri.anchors.entries()) {
-        if (vec2d.distance(mouse, p) <= 5) {
-          sel = [tri, ianchor];
-        }
+  const dragCircleEdge = (delta, circle) => {
+      vec2d.add(circle[1], circle[1], delta);
+  }
+
+    // funcao do retangulo
+    const dragVtx = (e, i, rect) => {
+        let mouse = [e.offsetX, e.offsetY];
+        let vtx = rect[i];
+        let delta = vec2d.sub([], mouse, prevMouse);
+        prevMouse = mouse;
+        vec2d.add(vtx, vtx, delta);
+        vec2d.sub(rect[(i + 1) % 4 + 1], rect[(i + 1) % 4 + 1], delta);
+
+        let size = Math.abs(vec2d.dist(rect[(i % 4) + 1], rect[0]));
+
+        vec2d.rotate(rect[(i % 4) + 1], vtx, rect[0], -Math.PI / 2);
+        vec2d.sub(rect[(i % 4) + 1], rect[(i % 4) + 1], rect[0]);
+        vec2d.normalize(rect[(i % 4) + 1], rect[(i % 4) + 1]);
+        vec2d.scale(rect[(i % 4) + 1], rect[(i % 4) + 1], size);
+        vec2d.add(rect[(i % 4) + 1], rect[(i % 4) + 1], rect[0]);
+
+
+        vec2d.rotate(rect[(i - 2 + 4) % 4 + 1], rect[(i % 4) + 1], rect[0], Math.PI);
+
+    };
+
+    const dragTriangleCenter = (delta, tri) => {
+        let v = vec2d.sub([], tri[1], tri[0]);
+        vec2d.add(tri[0], tri[0], delta);
+        vec2d.add(tri[1], tri[0], v);
+    };
+
+    const dragTriangleEdge = (delta, tri) => {
+        vec2d.add(tri[1], tri[1], delta);
+    };
+
+  // demo.onmousemove = (e) => {
+  //   if (sel) {
+  //     let mouse = [e.offsetX, e.offsetY];
+  //     let [tri, ianchor] = sel;
+  //     let delta = vec2d.sub([], mouse, prevMouse);
+  //     prevMouse = mouse;
+  //     if (ianchor == 0) {
+  //       let v = vec2d.sub([], tri.oppositeVertex, tri.basePoint);
+  //       vec2d.add(tri.basePoint, tri.basePoint, delta);
+  //       vec2d.add(tri.oppositeVertex, tri.basePoint, v);
+  //     } else {
+  //       vec2d.add(tri.oppositeVertex, tri.oppositeVertex, delta);
+  //     }
+  //     makePts();
+  //     update();
+  //   }
+  // };
+
+  // demo.onmousedown = (e) => {
+  //   sel = null;
+  //   const mouse = [e.offsetX, e.offsetY];
+  //   prevMouse = mouse;
+  //   for (let tri of iso) {
+  //     for (let [ianchor, p] of tri.anchors.entries()) {
+  //       if (vec2d.distance(mouse, p) <= 5) {
+  //         sel = [tri, ianchor];
+  //       }
+  //     }
+  //   }
+  // };
+
+  // demo.onmouseup = () => {
+  //   sel = null;
+  // };
+  // update();
+
+    demo.onmousedown = (e) => {
+      const mouse = [e.offsetX, e.offsetY];
+      prevMouse = mouse;
+      demo.onmousemove = null;
+
+      for (let r of rect) {
+          let points = [r.center].concat(r.sides);
+          // console.log("points", points);
+            for (let i of [0, 1, 2, 3, 4]) {
+                let p = points[i];
+                let d = vec2d.distance(mouse, p);
+                if (d <= 5) {
+                    demo.onmousemove =
+                        i == 0
+                            ? (e) => {
+                              console.log("entrou no base");
+                                dragBase(e, points);
+                                update();
+                            }
+                            : (e) => {
+                                console.log("entrou no drag");
+                                dragVtx(e, i, points);
+                                update();
+                            };
+                }
+            }
       }
-    }
+
+      for (let c of circ) {
+          let circlePoints = [c.center, c.radiusControl];
+          // console.log("circlepoints", circlePoints);
+          for (let i of [0, 1]) {
+              let p = circlePoints[i];
+              let d = vec2d.distance(mouse, p);
+              if (d <= 5) {
+                  demo.onmousemove = (e) => {
+                      let mouse = [e.offsetX, e.offsetY];
+                      let delta = vec2d.sub([], mouse, prevMouse);
+                      prevMouse = mouse;
+
+                      i == 0 ? dragCircleCenter(delta, circlePoints) : dragCircleEdge(delta, circlePoints);
+                      update();     
+                  }
+              }
+          }
+      }
+
+      for (let t of iso) {
+        let trianglePoints = [t.basePoint, t.oppositeVertex];
+        console.log("trianglePoints", trianglePoints);
+          for (let i of [0, 1]) {
+              let p = trianglePoints[i];
+              let d = vec2d.distance(mouse, p);
+              if (d <= 5) {
+                demo.onmousemove = (e) => {
+                    let mouse = [e.offsetX, e.offsetY];
+                    let delta = vec2d.sub([], mouse, prevMouse);
+                    prevMouse = mouse;
+
+                    i == 0 ? dragTriangleCenter(delta, trianglePoints) : dragTriangleEdge(delta, trianglePoints);
+                    makePts();
+                    update();     
+                }
+            }
+          }
+      }
   };
 
   demo.onmouseup = () => {
-    sel = null;
+      demo.onmousemove = null;
   };
   update();
 })();
-
-/**
- * Returns the 3 vertices of an isosceles triangle
- * defined by the center point of its base and the
- * opposite vertex.
- * @param {Array<Number,Number>} basePoint base midpoint.
- * @param {Array<Number,Number>} oppositeVertex opposite vertex.
- * @return {Array<Array<Number,Number>, Array<Number,Number>, Array<Number,Number>>}
- * an isosceles triangle (a convex polygon).
- * @see https://en.wikipedia.org/wiki/Isosceles_triangle
- * @see <img src="../Isosceles-Triangle.png" width="256">
- */
-function isosceles({ basePoint, oppositeVertex }) {
-  const u = vec2d.sub([], basePoint, oppositeVertex);
-  const v = [-u[1], u[0]];
-  const w = [u[1], -u[0]];
-  return [
-    oppositeVertex,
-    vec2d.add([], basePoint, v),
-    vec2d.add([], basePoint, w),
-  ];
-}
