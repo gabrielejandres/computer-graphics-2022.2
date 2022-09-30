@@ -212,15 +212,24 @@ function circleCircleIntersect(center1, radius1, center2, radius2) {}
  * @returns {Array<Array<Number,Number>>} a rectangle (a polygon).
  * @see <img src="../cRv2l.png" width="320">
  */
-function makeRectangle(center, u, size) {
-  const v = [-u[1], u[0]];
-  const halfSize = size / 2;
-  return [
-    vec2d.add([], center, [halfSize, 0]),
-    vec2d.add([], center, [0, halfSize]),
-    vec2d.add([], center, [-halfSize, 0]),
-    vec2d.add([], center, [0, -halfSize]),
-  ];
+// function makeRectangle(center, u, size) {
+//   const v = [-u[1], u[0]];
+//   const halfSize = size / 2;
+//   return [
+//     vec2d.add([], center, [halfSize, 0]),
+//     vec2d.add([], center, [0, halfSize]),
+//     vec2d.add([], center, [-halfSize, 0]),
+//     vec2d.add([], center, [0, -halfSize]),
+//   ];
+// }
+
+function makeRectangle(center, width, height) {
+    return [
+      vec2d.add([], center, [width, 0]),
+      vec2d.add([], center, [0, height]),
+      vec2d.add([], center, [-width, 0]),
+      vec2d.add([], center, [0, -height])
+    ];
 }
 
 function makeCircle(center, radius) {
@@ -262,6 +271,17 @@ function midPoints(poly) {
   return midPoints;
 }
 
+function getRectVertices(rect) {
+  let delta = vec2d.sub([], rect.sides[1], rect.center);
+
+    return [
+      vec2d.add([], rect.sides[0], delta),
+      vec2d.sub([], rect.sides[0], delta),
+      vec2d.sub([], rect.sides[2], delta),
+      vec2d.add([], rect.sides[2], delta)
+    ];
+}
+
 /**
  * <p>Demo: Teste de intersecao entre triangulos.</p>
  *
@@ -274,14 +294,14 @@ function midPoints(poly) {
  * @name isoscelesDemo
  * @function
  */
-(function isoscelesDemo() {
+(function PolygonsDemo() {
   const demo = document.querySelector("#theCanvas");
   const ctx = demo.getContext("2d");
   let [w, h] = [demo.clientWidth, demo.clientHeight];
   const iso = [
-    { basePoint: [270, 350], oppositeVertex: [300, 200], color: "black" },
-    { basePoint: [100, 100], oppositeVertex: [50, 20], color: "black" },
-    { basePoint: [250, 150], oppositeVertex: [150, 100], color: "black" },
+    { basePoint: [100, 100], oppositeVertex: [100, 50], color: "black" },
+    { basePoint: [250, 100], oppositeVertex: [250, 50], color: "black" },
+    { basePoint: [400, 100], oppositeVertex: [400, 50], color: "black" },
   ];
 
   function makePts() {
@@ -296,15 +316,14 @@ function midPoints(poly) {
   let prevMouse = null;
 
     const rect = [
-    { center: [350, 100], u: [1, 0], size: 100, color: "black" },
-    { center: [100, 200], u: [1, 0], size: 100, color: "black" },
-    { center: [400, 200], u: [1, 0], size: 100, color: "black" },
+    { center: [100, 230], sides: "", width: 50, height: 80, color: "black" },
+    { center: [250, 230], sides: "", width: 50, height: 80, color: "black" },
+    { center: [400, 230], sides: "", width: 50, height: 80, color: "black" },
   ];
 
     function makePtsRect() {
     for (let t of rect) {
-      t.poly = makeRectangle(t.center, t.u, t.size);
-      t.anchors = [t.center, t.u];
+      t.sides = makeRectangle(t.center, t.width, t.height);
     }
   }
 
@@ -344,17 +363,17 @@ function midPoints(poly) {
     }
 
     // rect âˆ© rect
-    for (let t1 of rect) {
-      t1.color = "black";
-      for (let t2 of rect) {
-        if (t1 == t2) continue;
-        let intersect = convexPolysIntersect(t1.poly, t2.poly); // TODO: adicionar um parametro pra saber qual eh  poligono
-        if (intersect) {
-          t1.color = "red";
-          t2.color = "red";
-        }
-      }
-    }
+    // for (let t1 of rect) {
+    //   t1.color = "black";
+    //   for (let t2 of rect) {
+    //     if (t1 == t2) continue;
+    //     let intersect = convexPolysIntersect(t1.poly, t2.poly); // TODO: adicionar um parametro pra saber qual eh  poligono
+    //     if (intersect) {
+    //       t1.color = "red";
+    //       t2.color = "red";
+    //     }
+    //   }
+    // }
 
     for (let t of rect) {
       ctx.fillStyle = ctx.strokeStyle = t.color;
@@ -365,13 +384,15 @@ function midPoints(poly) {
       ctx.fill();
 
       // Desenha os pontos das laterais
-      for (let p of t.poly) {
+      for (let p of t.sides) {
         ctx.beginPath();
         ctx.arc(...p, 5, 0, Math.PI * 2);
         ctx.fill();
       }
+
+      // Desenha as linhas do retangulo
       ctx.beginPath();
-      for (let p of t.poly) {
+      for (let p of getRectVertices(t)) {
         ctx.lineTo(...p);
       }
       ctx.closePath();
@@ -379,9 +400,9 @@ function midPoints(poly) {
     }
 
     const circ = [
-      { center: [200, 430], radius: 50, color: "black" },
-      { center: [80, 380], radius: 50, color: "black" },
-      { center: [350, 430], radius: 50, color: "black" },
+      { center: [100, 410], radius: 50, color: "black" },
+      { center: [250, 410], radius: 50, color: "black" },
+      { center: [400, 410], radius: 50, color: "black" },
     ];
 
     for (let c of circ) {
@@ -397,7 +418,7 @@ function midPoints(poly) {
       
       // Desenha o controlador
       ctx.beginPath();
-      ctx.arc(c.center[0] - c.radius, c.center[1], 5, 0, Math.PI * 2);
+      ctx.arc(c.center[0], c.center[1] - c.radius, 5, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -440,179 +461,6 @@ function midPoints(poly) {
   };
   update();
 })();
-
-// (function rectangleDemo() {
-//   const demo = document.querySelector("#theCanvas");
-//   const ctx = demo.getContext("2d");
-//   let [w, h] = [demo.clientWidth, demo.clientHeight];
-//   const rect = [
-//     { center: [100, 100], u: [1, 0], size: 100, color: "black" },
-//     { center: [200, 200], u: [1, 0], size: 100, color: "black" },
-//     { center: [300, 300], u: [1, 0], size: 100, color: "black" },
-//   ];
-
-//   function makePts() {
-//     for (let t of rect) {
-//       t.poly = makeRectangle(t.center, t.u, t.size);
-//       t.anchors = [t.center, t.u];
-//     }
-//   }
-
-//   makePts();
-//   let sel = null;
-//   let prevMouse = null;
-
-//   const update = () => {
-//     fillCanvas(ctx, w, h);
-
-//     // rect âˆ© rect
-//     for (let t1 of rect) {
-//       t1.color = "black";
-//       for (let t2 of rect) {
-//         if (t1 == t2) continue;
-//         let intersect = convexPolysIntersect(t1.poly, t2.poly);
-//         if (intersect) {
-//           t1.color = "red";
-//           t2.color = "red";
-//         }
-//       }
-//     }
-
-//     for (let t of rect) {
-//       ctx.fillStyle = ctx.strokeStyle = t.color;
-//       for (let p of t.anchors) {
-//         ctx.beginPath();
-//         ctx.arc(...p, 5, 0, Math.PI * 2);
-//         ctx.fill();
-//       }
-//       ctx.beginPath();
-//       for (let p of t.poly) {
-//         ctx.lineTo(...p);
-//       }
-//       ctx.closePath();
-//       ctx.stroke();
-//     }
-//   };
-//   update();
-
-//   demo.onmousemove = (e) => {
-//     if (sel) {
-//       let mouse = [e.offsetX, e.offsetY];
-//       let [r, ianchor] = sel;
-//       let delta = vec2d.sub([], mouse, prevMouse);
-//       prevMouse = mouse;
-//       if (ianchor == 0) {
-//         vec2d.add(r.center, r.center, delta);
-//       } else {
-//         vec2d.add(r.u, r.u, delta);
-//         vec2d.normalize(r.u, r.u);
-//       }
-//       makePts();
-//       update();
-//     }
-//   };
-
-//   demo.onmousedown = (e) => {
-//     sel = null;
-//     const mouse = [e.offsetX, e.offsetY];
-//     prevMouse = mouse;
-//     for (let r of rect) {
-//       for (let [ianchor, p] of r.anchors.entries()) {
-//         if (vec2d.distance(mouse, p) <= 5) {
-//           sel = [r, ianchor];
-//         }
-//       }
-//     }
-//   };
-
-//   demo.onmouseup = () => {
-//     sel = null;
-//   };
-//   update();
-// })();
-
-// (function rectangleDemo() {
-//   const demo = document.querySelector("#theCanvas");
-//   const ctx = demo.getContext("2d");
-//   let [w, h] = [demo.clientWidth, demo.clientHeight];
-//   const rect = [
-//     { center: [270, 350], u: [1, 0], size: 100, color: "black" },
-//     { center: [100, 100], u: [1, 0], size: 100, color: "black" },
-//     { center: [250, 150], u: [1, 0], size: 100, color: "black" },
-//   ];
-
-//   const update = () => {
-//     fillCanvas(ctx, w, h);
-
-//     // rect âˆ© rect
-//     for (let r1 of rect) {
-//       r1.color = "black";
-//       for (let r2 of rect) {
-//         if (r1 == r2) continue;
-//         let intersect = convexPolysIntersect(r1.poly, r2.poly);
-//         if (intersect) {
-//           r1.color = "red";
-//           r2.color = "red";
-//         }
-//       }
-//     }
-
-//     for (let r of rect) {
-//       ctx.fillStyle = ctx.strokeStyle = r.color;
-//       ctx.beginPath();
-//       for (let p of r.poly) {
-//         ctx.lineTo(...p);
-//       }
-//       ctx.closePath();
-//       ctx.stroke();
-//     }
-//   }
-
-//   function makePts() {
-//     for (let r of rect) {
-//       r.poly = makeRectangle(r.center, r.u, r.size);
-//       r.anchors = midPoints(r.poly);
-//     }
-//   }
-
-//   makePts();
-//   let sel = null;
-//   let prevMouse = null;
-
-//   demo.onmousemove = (e) => {
-//     if (sel) {
-//       let mouse = [e.offsetX, e.offsetY];
-//       let [r, ianchor] = sel;
-//       let delta = vec2d.sub([], mouse, prevMouse);
-//       prevMouse = mouse;
-//       if (ianchor == 0) {
-//         vec2d.add(r.center, r.center, delta);
-//       } else {
-//         vec2d.add(r.u, r.u, delta);
-//       }
-//       makePts();
-//       update();
-//     }
-//   }
-
-//   demo.onmousedown = (e) => {
-//     sel = null;
-//     const mouse = [e.offsetX, e.offsetY];
-//     prevMouse = mouse;
-//     for (let r of rect) {
-//       for (let [ianchor, p] of r.anchors.entries()) {
-//         if (vec2d.distance(mouse, p) <= 5) {
-//           sel = [r, ianchor];
-//         }
-//       }
-//     }
-//   }
-
-//   demo.onmouseup = () => {
-//     sel = null;
-//   }
-//   update();
-// })();
 
 /**
  * Returns the 3 vertices of an isosceles triangle
