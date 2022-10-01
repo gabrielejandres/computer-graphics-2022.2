@@ -1,34 +1,36 @@
 <html>
   <head>
-    <title>Polygon Intersection</title>
+    <title>Polygons Intersection</title>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <link rel="stylesheet" href="PolygonIntersection.css" />
   </head>
 
   <body>
-    <div id="container" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div id="container">
       <canvas id="theCanvas" width="500" height="500">
         Please upgrade your browser.
       </canvas>
       <h2>Triangle ∩ Rectangle ∩ Circle</h2>
     </div>
 
-    <!-- gl-matrix.js is not esm compatible -->
-    <script src="utils/gl-matrix.js"></script>
-    <script type="text/javascript">
-      // deconstruct glMatrix object.
-      const { mat2, mat3, mat4, vec2, vec3, vec4 } = glMatrix;
-    </script>
-
     <script type="module" src="PolygonIntersection.js"></script>
+    <script src="./utils/gl-matrix.js"></script>
+    <script src="./utils/SAT.js"></script>
+    <script type="text/javascript">
+      const { mat2, mat3, mat4, vec2, vec3, vec4 } = glMatrix; // deconstruct glMatrix object.
+    </script>
+    
 
     <script>
       const queryString = window.location.search;
-      const urlParams = new URLSearchParams(queryString);
+
+      // Get the width and height of the canvas from URL parameters
+      const urlParams = new URLSearchParams(queryString); 
       const x = urlParams.get("w") || "500";
       const y = urlParams.get("h") || "500";
 
+      // Set the width and height of the canvas 
       let canvas = document.getElementById("theCanvas");
       canvas.width = x;
       canvas.height = y;

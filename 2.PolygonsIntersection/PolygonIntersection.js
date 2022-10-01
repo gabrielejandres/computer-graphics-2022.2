@@ -5,14 +5,14 @@
  *
  *  @author Gabriele Jandres Cavalcanti
  *  @since 20/09/2022
- *  @see https://gabrielejandres.github.io/computer-graphics-2022.2/trab02/PolygonIntersection.html
+ *  @see https://gabrielejandres.github.io/computer-graphics-2022.2/2.PolygonIntersection/PolygonIntersection.html
  */
 
 "use strict";
 
 import * as util2d from "./utils/2d.js";
 
-const curry = fn => {
+const curry = (fn) => {
   const curried = (...args) => {
     if (args.length >= fn.length) {
       return fn(...args);
@@ -132,7 +132,7 @@ function fillCanvas(ctx, w, h) {
  * @see https://en.wikipedia.org/wiki/Isosceles_triangle
  * @see <img src="../Isosceles-Triangle.png" width="256">
  */
- function isosceles({ basePoint, oppositeVertex }) {
+function isosceles({ basePoint, oppositeVertex }) {
   const u = vec2d.sub([], basePoint, oppositeVertex);
   const v = [-u[1], u[0]];
   const w = [u[1], -u[0]];
@@ -154,15 +154,15 @@ function closestPolyPoint(p, poly) {}
 
 /**
  * Returns true if convex polygons poly and poly2 intersect.
- * 
- * The algorithm is based on the separated axis theorem (SAT), which states that, 
+ *
+ * The algorithm is based on the separated axis theorem (SAT), which states that,
  * if two polys do not intersect, then there is a separation line between them,
  * in such a way that the vertices of poly are on one side of the line,
  * and the vertices of poly2 are on the other side.
- * 
+ *
  * It is enough to test the edges of each polygon as a separation line.
  * If none of them do separate the polys, then they must intersect each other.
- * 
+ *
  * @param {Array<Array<Number,Number>>} poly first polygon.
  * @param {Array<Array<Number,Number>>} poly2 second polygon.
  * @returns {Boolean} intersect or not.
@@ -175,7 +175,7 @@ function convexPolysIntersect(poly, poly2) {
   let points2 = 0;
   // console.log(poly);
   // console.log(poly2);
-  
+
   // Para cada aresta do polígono 1
   for (i = 0; i < n; i++) {
     p = poly[i];
@@ -219,15 +219,58 @@ function convexPolyCircleIntersect(poly, center, radius) {}
  * @see https://milania.de/blog/Intersection_area_of_two_circles_with_implementation_in_C%2B%2B
  * @see <img src="../IntersectingCirclesArea_CircularSegmentsSmallAngle.png" width="320">
  */
-function circleCircleIntersect(center1, radius1, center2, radius2) {}
+function circleCircleIntersect(center1, radius1, center2, radius2) {
+  let d = vec2d.dist(center1, center2);
+  if (d > radius1 + radius2) {
+    return false;
+  }
+  return true;
+}
+
+function circleRectIntersection(circleCenter, circleRadius, rectanglePoints) {
+  if (util2d.pointInConvexPoly(circleCenter, rectanglePoints)) return true;
+  for (let i = 0; i < 4; i++) {
+    if (
+      util2d.distToSegment(
+        circleCenter,
+        rectanglePoints[i],
+        rectanglePoints[(i + 1) % 4]
+      ) <= circleRadius
+    )
+      return true;
+  }
+
+  return false;
+}
+
+function circleTriangleIntersection(
+  circleCenter,
+  circleRadius,
+  trianglePoints
+) {
+  // console.log("triangle", trianglePoints);
+  if (util2d.pointInConvexPoly(circleCenter, trianglePoints)) return true;
+  for (let i = 0; i < 3; i++) {
+    if (
+      util2d.distToSegment(
+        circleCenter,
+        trianglePoints[i],
+        trianglePoints[(i + 1) % 3]
+      ) <= circleRadius
+    )
+      return true;
+  }
+
+  return false;
+}
 
 function makeRectangle(center, width, height) {
-    return [
-      vec2d.add([], center, [width, 0]),
-      vec2d.add([], center, [0, height]),
-      vec2d.add([], center, [-width, 0]),
-      vec2d.add([], center, [0, -height])
-    ];
+  return [
+    vec2d.add([], center, [width, 0]),
+    vec2d.add([], center, [0, height]),
+    vec2d.add([], center, [-width, 0]),
+    vec2d.add([], center, [0, -height]),
+  ];
 }
 
 // function makeRectangle(center, u, size) {
@@ -262,12 +305,81 @@ function midPoints(poly) {
 function getRectVertices(rect) {
   let delta = vec2d.sub([], rect.sides[1], rect.center);
 
-    return [
-      vec2d.add([], rect.sides[0], delta),
-      vec2d.sub([], rect.sides[0], delta),
-      vec2d.sub([], rect.sides[2], delta),
-      vec2d.add([], rect.sides[2], delta)
-    ];
+  return [
+    vec2d.add([], rect.sides[0], delta),
+    vec2d.sub([], rect.sides[0], delta),
+    vec2d.sub([], rect.sides[2], delta),
+    vec2d.add([], rect.sides[2], delta),
+  ];
+}
+
+function checkRectIntersection(rect, rectTwo) {
+  let V = SAT.Vector;
+  let P = SAT.Polygon;
+
+  let polygon1 = new P(new V(), [
+    new V(rect[0][0], rect[0][1]),
+    new V(rect[1][0], rect[1][1]),
+    new V(rect[2][0], rect[2][1]),
+    new V(rect[3][0], rect[3][1]),
+  ]);
+
+  let polygon2 = new P(new V(), [
+    new V(rectTwo[0][0], rectTwo[0][1]),
+    new V(rectTwo[1][0], rectTwo[1][1]),
+    new V(rectTwo[2][0], rectTwo[2][1]),
+    new V(rectTwo[3][0], rectTwo[3][1]),
+  ]);
+
+  let response;
+  let collided = SAT.testPolygonPolygon(polygon1, polygon2, response);
+
+  return collided;
+}
+
+function rectTriangleIntersection(rect, triangle) {
+  let V = SAT.Vector;
+  let P = SAT.Polygon;
+
+  let polygon1 = new P(new V(), [
+    new V(rect[0][0], rect[0][1]),
+    new V(rect[1][0], rect[1][1]),
+    new V(rect[2][0], rect[2][1]),
+    new V(rect[3][0], rect[3][1]),
+  ]);
+
+  let polygon2 = new P(new V(), [
+    new V(triangle[0][0], triangle[0][1]),
+    new V(triangle[1][0], triangle[1][1]),
+    new V(triangle[2][0], triangle[2][1]),
+  ]);
+
+  let response;
+  let collided = SAT.testPolygonPolygon(polygon1, polygon2, response);
+
+  return collided;
+}
+
+function triangleTriangleIntersection(triangle, triangleTwo) {
+  let V = SAT.Vector;
+  let P = SAT.Polygon;
+
+  let polygon1 = new P(new V(), [
+    new V(triangle[0][0], triangle[0][1]),
+    new V(triangle[1][0], triangle[1][1]),
+    new V(triangle[2][0], triangle[2][1]),
+  ]);
+
+  let polygon2 = new P(new V(), [
+    new V(triangleTwo[0][0], triangleTwo[0][1]),
+    new V(triangleTwo[1][0], triangleTwo[1][1]),
+    new V(triangleTwo[2][0], triangleTwo[2][1]),
+  ]);
+
+  let response;
+  let collided = SAT.testPolygonPolygon(polygon1, polygon2, response);
+
+  return collided;
 }
 
 /**
@@ -294,15 +406,30 @@ function getRectVertices(rect) {
   ];
 
   const rect = [
-    { center: [100, 230], sides: "", width: 50, height: 80, color: "black" },
-    { center: [250, 230], sides: "", width: 50, height: 80, color: "black" },
-    { center: [400, 230], sides: "", width: 50, height: 80, color: "black" },
+    { center: [100, 230], width: 50, height: 80, color: "black" },
+    { center: [250, 230], width: 50, height: 80, color: "black" },
+    { center: [400, 230], width: 50, height: 80, color: "black" },
   ];
 
   const circ = [
-    { center: [100, 410], radius: 50, radiusControl: [100, 360], color: "black" },
-    { center: [250, 410], radius: 50, radiusControl: [250, 360], color: "black" },
-    { center: [400, 410], radius: 50, radiusControl: [400, 360], color: "black" },
+    {
+      center: [100, 410],
+      radius: 50,
+      radiusControl: [100, 360],
+      color: "black",
+    },
+    {
+      center: [250, 410],
+      radius: 50,
+      radiusControl: [250, 360],
+      color: "black",
+    },
+    {
+      center: [400, 410],
+      radius: 50,
+      radiusControl: [400, 360],
+      color: "black",
+    },
   ];
 
   function makePts() {
@@ -313,13 +440,19 @@ function getRectVertices(rect) {
 
     for (let t of rect) {
       t.sides = makeRectangle(t.center, t.width, t.height);
-      t.anchors = t.sides;
+      t.vertices = getRectVertices(t);
     }
   }
 
   function updateRadius() {
     for (let c of circ) {
       c.radius = vec2d.len(vec2d.sub([], c.radiusControl, c.center));
+    }
+  }
+
+  function updateVertices() {
+    for (let t of rect) {
+      t.vertices = getRectVertices(t);
     }
   }
 
@@ -330,16 +463,35 @@ function getRectVertices(rect) {
   const update = () => {
     fillCanvas(ctx, w, h);
     updateRadius();
+    updateVertices();
 
     // tri âˆ© tri
     for (let t1 of iso) {
       t1.color = "black";
       for (let t2 of iso) {
         if (t1 == t2) continue;
-        let intersect = convexPolysIntersect(t1.poly, t2.poly);
+        // let intersect = convexPolysIntersect(t1.poly, t2.poly);
+        let intersect = triangleTriangleIntersection(
+          isosceles(t1),
+          isosceles(t2)
+        );
         if (intersect) {
           t1.color = "red";
           t2.color = "red";
+        }
+      }
+
+      for (let c of circ) {
+        if (circleTriangleIntersection(c.center, c.radius, t1.poly)) {
+          c.color = "red";
+          t1.color = "red";
+        }
+      }
+
+      for (let r of rect) {
+        if (rectTriangleIntersection(r.vertices, t1.poly)) {
+          r.color = "red";
+          t1.color = "red";
         }
       }
     }
@@ -364,10 +516,28 @@ function getRectVertices(rect) {
       t1.color = "black";
       for (let t2 of rect) {
         if (t1 == t2) continue;
-        let intersect = convexPolysIntersect(t1.sides, t2.sides); // TODO: adicionar um parametro pra saber qual eh  poligono
+        // let intersect = convexPolysIntersect(t1.sides, t2.sides); // TODO: adicionar um parametro pra saber qual eh  poligono
+        let intersect = checkRectIntersection(
+          getRectVertices(t1),
+          getRectVertices(t2)
+        );
         if (intersect) {
           t1.color = "red";
           t2.color = "red";
+        }
+      }
+
+      for (let c of circ) {
+        if (circleRectIntersection(c.center, c.radius, getRectVertices(t1))) {
+          c.color = "red";
+          t1.color = "red";
+        }
+      }
+
+      for (let t of iso) {
+        if (rectTriangleIntersection(getRectVertices(t1), t.poly)) {
+          t.color = "red";
+          t1.color = "red";
         }
       }
     }
@@ -396,6 +566,32 @@ function getRectVertices(rect) {
       ctx.stroke();
     }
 
+    for (let c1 of circ) {
+      c1.color = "black";
+      for (let c2 of circ) {
+        if (c1 == c2) continue;
+        if (circleCircleIntersect(c1.center, c1.radius, c2.center, c2.radius)) {
+          c1.color = "red";
+          c2.color = "red";
+        }
+      }
+
+      for (let r of rect) {
+        if (circleRectIntersection(c1.center, c1.radius, r.vertices)) {
+          c1.color = "red";
+          r.color = "red";
+        }
+      }
+
+      for (let t of iso) {
+        // console.log("t", t.poly);
+        if (circleTriangleIntersection(c1.center, c1.radius, t.poly)) {
+          c1.color = "red";
+          t.color = "red";
+        }
+      }
+    }
+
     for (let c of circ) {
       ctx.fillStyle = ctx.strokeStyle = c.color;
 
@@ -413,174 +609,144 @@ function getRectVertices(rect) {
       ctx.beginPath();
       ctx.arc(...c.center, 5, 0, Math.PI * 2);
       ctx.fill();
-      
+
       // Desenha o controlador
       ctx.beginPath();
       ctx.arc(...c.radiusControl, 5, 0, Math.PI * 2);
       ctx.fill();
     }
-
   };
   update();
 
   // funcao do retangulo
-    const dragBase = (e, rectPoints) => {
-        let mouse = [e.offsetX, e.offsetY];
-        let delta = vec2d.sub([], mouse, prevMouse);
-        prevMouse = mouse;
-        vec2d.add(rectPoints[0], rectPoints[0], delta);
-        for (let i = 1; i < 5; i++) {
-            vec2d.add(rectPoints[i], rectPoints[i], delta);
-        }
-    };
+  const dragBase = (e, rectPoints) => {
+    let mouse = [e.offsetX, e.offsetY];
+    let delta = vec2d.sub([], mouse, prevMouse);
+    prevMouse = mouse;
+    vec2d.add(rectPoints[0], rectPoints[0], delta);
+    for (let i = 1; i < 5; i++) {
+      vec2d.add(rectPoints[i], rectPoints[i], delta);
+    }
+  };
 
-    const dragCircleCenter = (delta, circle) => {
-      vec2d.add(circle[0], circle[0], delta);
-      vec2d.add(circle[1], circle[1], delta);
+  const dragCircleCenter = (delta, circle) => {
+    vec2d.add(circle[0], circle[0], delta);
+    vec2d.add(circle[1], circle[1], delta);
   };
 
   const dragCircleEdge = (delta, circle) => {
-      vec2d.add(circle[1], circle[1], delta);
-  }
+    vec2d.add(circle[1], circle[1], delta);
+  };
 
-    // funcao do retangulo
-    const dragVtx = (e, i, rect) => {
-        let mouse = [e.offsetX, e.offsetY];
-        let vtx = rect[i];
-        let delta = vec2d.sub([], mouse, prevMouse);
-        prevMouse = mouse;
-        vec2d.add(vtx, vtx, delta);
-        vec2d.sub(rect[(i + 1) % 4 + 1], rect[(i + 1) % 4 + 1], delta);
+  // funcao do retangulo
+  const dragVtx = (e, i, rect) => {
+    let mouse = [e.offsetX, e.offsetY];
+    let vtx = rect[i];
+    let delta = vec2d.sub([], mouse, prevMouse);
+    prevMouse = mouse;
+    vec2d.add(vtx, vtx, delta);
+    vec2d.sub(rect[((i + 1) % 4) + 1], rect[((i + 1) % 4) + 1], delta);
 
-        let size = Math.abs(vec2d.dist(rect[(i % 4) + 1], rect[0]));
+    let size = Math.abs(vec2d.dist(rect[(i % 4) + 1], rect[0]));
 
-        vec2d.rotate(rect[(i % 4) + 1], vtx, rect[0], -Math.PI / 2);
-        vec2d.sub(rect[(i % 4) + 1], rect[(i % 4) + 1], rect[0]);
-        vec2d.normalize(rect[(i % 4) + 1], rect[(i % 4) + 1]);
-        vec2d.scale(rect[(i % 4) + 1], rect[(i % 4) + 1], size);
-        vec2d.add(rect[(i % 4) + 1], rect[(i % 4) + 1], rect[0]);
+    vec2d.rotate(rect[(i % 4) + 1], vtx, rect[0], -Math.PI / 2);
+    vec2d.sub(rect[(i % 4) + 1], rect[(i % 4) + 1], rect[0]);
+    vec2d.normalize(rect[(i % 4) + 1], rect[(i % 4) + 1]);
+    vec2d.scale(rect[(i % 4) + 1], rect[(i % 4) + 1], size);
+    vec2d.add(rect[(i % 4) + 1], rect[(i % 4) + 1], rect[0]);
 
+    vec2d.rotate(
+      rect[((i - 2 + 4) % 4) + 1],
+      rect[(i % 4) + 1],
+      rect[0],
+      Math.PI
+    );
+  };
 
-        vec2d.rotate(rect[(i - 2 + 4) % 4 + 1], rect[(i % 4) + 1], rect[0], Math.PI);
+  const dragTriangleCenter = (delta, tri) => {
+    let v = vec2d.sub([], tri[1], tri[0]);
+    vec2d.add(tri[0], tri[0], delta);
+    vec2d.add(tri[1], tri[0], v);
+  };
 
-    };
+  const dragTriangleEdge = (delta, tri) => {
+    vec2d.add(tri[1], tri[1], delta);
+  };
 
-    const dragTriangleCenter = (delta, tri) => {
-        let v = vec2d.sub([], tri[1], tri[0]);
-        vec2d.add(tri[0], tri[0], delta);
-        vec2d.add(tri[1], tri[0], v);
-    };
+  demo.onmousedown = (e) => {
+    const mouse = [e.offsetX, e.offsetY];
+    prevMouse = mouse;
+    demo.onmousemove = null;
 
-    const dragTriangleEdge = (delta, tri) => {
-        vec2d.add(tri[1], tri[1], delta);
-    };
-
-  // demo.onmousemove = (e) => {
-  //   if (sel) {
-  //     let mouse = [e.offsetX, e.offsetY];
-  //     let [tri, ianchor] = sel;
-  //     let delta = vec2d.sub([], mouse, prevMouse);
-  //     prevMouse = mouse;
-  //     if (ianchor == 0) {
-  //       let v = vec2d.sub([], tri.oppositeVertex, tri.basePoint);
-  //       vec2d.add(tri.basePoint, tri.basePoint, delta);
-  //       vec2d.add(tri.oppositeVertex, tri.basePoint, v);
-  //     } else {
-  //       vec2d.add(tri.oppositeVertex, tri.oppositeVertex, delta);
-  //     }
-  //     makePts();
-  //     update();
-  //   }
-  // };
-
-  // demo.onmousedown = (e) => {
-  //   sel = null;
-  //   const mouse = [e.offsetX, e.offsetY];
-  //   prevMouse = mouse;
-  //   for (let tri of iso) {
-  //     for (let [ianchor, p] of tri.anchors.entries()) {
-  //       if (vec2d.distance(mouse, p) <= 5) {
-  //         sel = [tri, ianchor];
-  //       }
-  //     }
-  //   }
-  // };
-
-  // demo.onmouseup = () => {
-  //   sel = null;
-  // };
-  // update();
-
-    demo.onmousedown = (e) => {
-      const mouse = [e.offsetX, e.offsetY];
-      prevMouse = mouse;
-      demo.onmousemove = null;
-
-      for (let r of rect) {
-          let points = [r.center].concat(r.sides);
-          // console.log("points", points);
-            for (let i of [0, 1, 2, 3, 4]) {
-                let p = points[i];
-                let d = vec2d.distance(mouse, p);
-                if (d <= 5) {
-                    demo.onmousemove =
-                        i == 0
-                            ? (e) => {
-                              console.log("entrou no base");
-                                dragBase(e, points);
-                                update();
-                            }
-                            : (e) => {
-                                console.log("entrou no drag");
-                                dragVtx(e, i, points);
-                                update();
-                            };
+    for (let r of rect) {
+      let points = [r.center].concat(r.sides);
+      // console.log("points", points);
+      for (let i of [0, 1, 2, 3, 4]) {
+        let p = points[i];
+        let d = vec2d.distance(mouse, p);
+        if (d <= 5) {
+          demo.onmousemove =
+            i == 0
+              ? (e) => {
+                  // console.log("entrou no base");
+                  dragBase(e, points);
+                  update();
                 }
-            }
+              : (e) => {
+                  // console.log("entrou no drag");
+                  dragVtx(e, i, points);
+                  update();
+                };
+        }
       }
+    }
 
-      for (let c of circ) {
-          let circlePoints = [c.center, c.radiusControl];
-          // console.log("circlepoints", circlePoints);
-          for (let i of [0, 1]) {
-              let p = circlePoints[i];
-              let d = vec2d.distance(mouse, p);
-              if (d <= 5) {
-                  demo.onmousemove = (e) => {
-                      let mouse = [e.offsetX, e.offsetY];
-                      let delta = vec2d.sub([], mouse, prevMouse);
-                      prevMouse = mouse;
+    for (let c of circ) {
+      let circlePoints = [c.center, c.radiusControl];
+      // console.log("circlepoints", circlePoints);
+      for (let i of [0, 1]) {
+        let p = circlePoints[i];
+        let d = vec2d.distance(mouse, p);
+        if (d <= 5) {
+          demo.onmousemove = (e) => {
+            let mouse = [e.offsetX, e.offsetY];
+            let delta = vec2d.sub([], mouse, prevMouse);
+            prevMouse = mouse;
 
-                      i == 0 ? dragCircleCenter(delta, circlePoints) : dragCircleEdge(delta, circlePoints);
-                      update();     
-                  }
-              }
-          }
+            i == 0
+              ? dragCircleCenter(delta, circlePoints)
+              : dragCircleEdge(delta, circlePoints);
+            update();
+          };
+        }
       }
+    }
 
-      for (let t of iso) {
-        let trianglePoints = [t.basePoint, t.oppositeVertex];
-        console.log("trianglePoints", trianglePoints);
-          for (let i of [0, 1]) {
-              let p = trianglePoints[i];
-              let d = vec2d.distance(mouse, p);
-              if (d <= 5) {
-                demo.onmousemove = (e) => {
-                    let mouse = [e.offsetX, e.offsetY];
-                    let delta = vec2d.sub([], mouse, prevMouse);
-                    prevMouse = mouse;
+    for (let t of iso) {
+      let trianglePoints = [t.basePoint, t.oppositeVertex];
+      // console.log("trianglePoints", trianglePoints);
+      for (let i of [0, 1]) {
+        let p = trianglePoints[i];
+        let d = vec2d.distance(mouse, p);
+        if (d <= 5) {
+          demo.onmousemove = (e) => {
+            let mouse = [e.offsetX, e.offsetY];
+            let delta = vec2d.sub([], mouse, prevMouse);
+            prevMouse = mouse;
 
-                    i == 0 ? dragTriangleCenter(delta, trianglePoints) : dragTriangleEdge(delta, trianglePoints);
-                    makePts();
-                    update();     
-                }
-            }
-          }
+            i == 0
+              ? dragTriangleCenter(delta, trianglePoints)
+              : dragTriangleEdge(delta, trianglePoints);
+            makePts();
+            update();
+          };
+        }
       }
+    }
   };
 
   demo.onmouseup = () => {
-      demo.onmousemove = null;
+    demo.onmousemove = null;
   };
   update();
 })();
