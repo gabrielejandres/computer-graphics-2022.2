@@ -447,13 +447,19 @@ function checkTriangleIntersections(triangle, triangles, rectangles, circles) {
  * @param {Array<Object>} circles the circles on canvas
 */
 function checkRectangleIntersections(rectangle, triangles, rectangles, circles) {
-  for (let rectangle2 of rectangles)
-    if (rectangle != rectangle2 && convexPolysIntersect(rectangle.poly, rectangle2.poly)) 
+  for (let rectangle2 of rectangles) {
+    if (rectangle != rectangle2 && convexPolysIntersect(rectangle.poly, rectangle2.poly)) {
       rectangle.color = rectangle2.color = "red";
+      console.log("rect", rectangle2);
+    }
+  }
 
   for (let circle of circles) 
-    if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle.poly))
+    if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle.poly)) {
       circle.color = rectangle.color = "red";
+      console.log("rectC", rectangle);
+      console.log("circle", circle);
+    }
 
   for (let triangle of triangles) 
     if (convexPolysIntersect(rectangle.poly, triangle.poly)) 

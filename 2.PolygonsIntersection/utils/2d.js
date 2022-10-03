@@ -106,13 +106,20 @@ export function segmentsIntersectProper(a, b, c, d) {
  * @returns {Boolean} true.
  */
 export function pointInConvexPoly(p, poly) {
-  let prevPoint = poly[poly.length - 1];
-  let prevOrient = 0;
-  for (let q of poly) {
-    const o = orient(prevPoint, q, p);
-    if (Math.abs(o - prevOrient) > 1) return false;
-    prevOrient = o;
-    prevPoint = q;
+  let equalsX = false;
+  let equalsY = false;
+
+  for (let i = 1; i < poly.length; i++) {
+    if (poly[0][0] == poly[i][0]) equalsX = true;
+    if (poly[0][1] == poly[i][1]) equalsY = true;
+  }
+
+  if (equalsX && equalsY) return false;
+
+  let o = orient(poly[0], poly[1], p);
+  for (let i = 1; i < poly.length; i++) {
+    let o2 = orient(poly[i], poly[(i + 1) % poly.length], p);
+    if (o2 != o) return false;
   }
   return true;
 }
