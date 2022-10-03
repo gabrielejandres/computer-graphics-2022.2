@@ -226,7 +226,7 @@ function convexPolyCircleIntersect(circleCenter, circleRadius, poly) {
  * @param {Number} radius2 second circle radius.
  * @returns {Boolean} intersect or not.
  */
-function circleCircleIntersect(center1, radius1, center2, radius2) {
+function circlesIntersect(center1, radius1, center2, radius2) {
   return vec2d.dist(center1, center2) > radius1 + radius2 ? false : true;
 }
 
@@ -469,7 +469,7 @@ function checkRectangleIntersections(rectangle, triangles, rectangles, circles) 
 */
 function checkCircleIntersections(circle, triangles, rectangles, circles) {
   for (let circle2 of circles) 
-    if (circle != circle2 && circleCircleIntersect(circle.center, circle.radius, circle2.center, circle2.radius)) 
+    if (circle != circle2 && circlesIntersect(circle.center, circle.radius, circle2.center, circle2.radius)) 
       circle.color = circle2.color = "red";
 
   for (let rectangle of rectangles) 
