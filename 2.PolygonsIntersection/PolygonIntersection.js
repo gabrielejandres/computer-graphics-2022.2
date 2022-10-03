@@ -187,10 +187,19 @@ function createMidPoints(center, width, height) {
  * @param {Array<Array<Number,Number>>} polygon2 second polygon.
  * @returns {Boolean} intersect or not.
  */
- function convexPolysIntersect(polygon, polygon2) {
+ function convexPolysIntersect(poly, poly2) {
   let response;
   let vectors = [];
   let vectors2 = [];
+  let polygon = poly.poly;
+  let polygon2 = poly2.poly;
+  let degenerated = false;
+
+  // Check if any of the polys is degenerated
+  for (let i = 0; i < (poly2.anchors).length - 1; i++)
+    degenerated = poly2.anchors[i][0] == poly2.anchors[i + 1][0] && poly2.anchors[i][1] == poly2.anchors[i + 1][1];
+
+  if (degenerated) return false;
 
   for (let i = 0; i < polygon.length; i++)
     vectors.push(new SAT.Vector(polygon[i][0], polygon[i][1]));
@@ -198,7 +207,7 @@ function createMidPoints(center, width, height) {
   for (let i = 0; i < polygon2.length; i++) 
     vectors2.push(new SAT.Vector(polygon2[i][0], polygon2[i][1]));
 
-  return SAT.testPolygonPolygon(new SAT.Polygon(new SAT.Vector(), vectors), new SAT.Polygon(new SAT.Vector(), vectors2), response);
+  return SAT.testPolygonPolygon(new SAT.Polygon(new SAT.Vector(), vectors), new SAT.Polygon(new SAT.Vector(), vectors2), response);;
 }
 
 /**
@@ -427,15 +436,15 @@ function drawCircle(ctx, circle) {
 */
 function checkTriangleIntersections(triangle, triangles, rectangles, circles) {
   for (let triangle2 of triangles)
-    if (triangle != triangle2 && convexPolysIntersect(triangle.poly, triangle2.poly)) 
+    if (triangle != triangle2 && convexPolysIntersect(triangle, triangle2)) 
       triangle.color = triangle2.color = "red";
 
   for (let circle of circles) 
     if (convexPolyCircleIntersect(circle.center, circle.radius, triangle.poly)) 
       circle.color = triangle.color = "red";
 
-  for (let rectangle of rectangles) 
-    if (convexPolysIntersect(rectangle.poly, triangle.poly)) 
+  for (let rectangle of rectangles)
+    if (convexPolysIntersect(rectangle, triangle)) 
       rectangle.color = triangle.color = "red";
 }
 
@@ -447,23 +456,17 @@ function checkTriangleIntersections(triangle, triangles, rectangles, circles) {
  * @param {Array<Object>} circles the circles on canvas
 */
 function checkRectangleIntersections(rectangle, triangles, rectangles, circles) {
-  for (let rectangle2 of rectangles) {
-    if (rectangle != rectangle2 && convexPolysIntersect(rectangle.poly, rectangle2.poly)) {
+  for (let rectangle2 of rectangles)
+    if (rectangle != rectangle2 && convexPolysIntersect(rectangle, rectangle2))
       rectangle.color = rectangle2.color = "red";
-      console.log("rect", rectangle2);
-    }
-  }
 
   for (let circle of circles) 
-    if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle.poly)) {
+    if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle.poly))
       circle.color = rectangle.color = "red";
-      console.log("rectC", rectangle);
-      console.log("circle", circle);
-    }
 
   for (let triangle of triangles) 
-    if (convexPolysIntersect(rectangle.poly, triangle.poly)) 
-      triangle.color = rectangle.color = "red";
+    if (convexPolysIntersect(rectangle, triangle)) 
+      triangle.color = rectangle.color = "red";    
 }
 
 /**
