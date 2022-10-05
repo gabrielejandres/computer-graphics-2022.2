@@ -196,6 +196,9 @@ function createMidPoints(center, width, height) {
   let degenerated = false;
 
   // Check if any of the polys is degenerated
+  for (let i = 0; i < (poly.anchors).length - 1; i++)
+    degenerated = poly.anchors[i][0] == poly.anchors[i + 1][0] && poly.anchors[i][1] == poly.anchors[i + 1][1];
+
   for (let i = 0; i < (poly2.anchors).length - 1; i++)
     degenerated = poly2.anchors[i][0] == poly2.anchors[i + 1][0] && poly2.anchors[i][1] == poly2.anchors[i + 1][1];
 
