@@ -173,6 +173,31 @@ function createMidPoints(center, width, height) {
 }
 
 /**
+ * Returns true if convex polygon is degenerated to point
+ * @param {Array<Array<Number,Number>>} poly polygon.
+ * @returns {Boolean} is point or not.
+*/
+function isPoint(poly) {
+  let point;
+  for (let i = 0; i < poly.length - 1; i++)
+    point = poly[i][0] == poly[i + 1][0] && poly[i][1] == poly[i + 1][1];
+    
+  return point;
+}
+
+/**
+ * Returns true if convex polygon is degenerated
+ * @param {Array<Array<Number,Number>>} poly polygon.
+ * @returns {Boolean} intersect or not.
+*/
+function isDegenerated(poly) {
+  for (let i = 1; i < poly.length; i++)
+    if (vec2d.equals(poly[0], poly[i])) return true;
+
+  return false;
+}
+
+/**
  * Returns true if convex polygons poly and poly2 intersect.
  *
  * The algorithm is based on the separated axis theorem (SAT), which states that,
@@ -183,8 +208,8 @@ function createMidPoints(center, width, height) {
  * It is enough to test the edges of each polygon as a separation line.
  * If none of them do separate the polys, then they must intersect each other.
  *
- * @param {Array<Array<Number,Number>>} polygon first polygon.
- * @param {Array<Array<Number,Number>>} polygon2 second polygon.
+ * @param {Array<Array<Number,Number>>} poly first polygon.
+ * @param {Array<Array<Number,Number>>} poly2 second polygon.
  * @returns {Boolean} intersect or not.
  */
  function convexPolysIntersect(poly, poly2) {
@@ -193,16 +218,10 @@ function createMidPoints(center, width, height) {
   let vectors2 = [];
   let polygon = poly.poly;
   let polygon2 = poly2.poly;
-  let degenerated = false;
 
-  // Check if any of the polys is degenerated
-  for (let i = 0; i < (poly.anchors).length - 1; i++)
-    degenerated = poly.anchors[i][0] == poly.anchors[i + 1][0] && poly.anchors[i][1] == poly.anchors[i + 1][1];
-
-  for (let i = 0; i < (poly2.anchors).length - 1; i++)
-    degenerated = poly2.anchors[i][0] == poly2.anchors[i + 1][0] && poly2.anchors[i][1] == poly2.anchors[i + 1][1];
-
-  if (degenerated) return false;
+  // Check if the polys are degenerated or points
+  if (isDegenerated(poly.anchors) && isDegenerated(poly2.anchors)) return false;
+  if (isPoint(poly.anchors) && isPoint(poly2.anchors)) return false;
 
   for (let i = 0; i < polygon.length; i++)
     vectors.push(new SAT.Vector(polygon[i][0], polygon[i][1]));
@@ -215,17 +234,20 @@ function createMidPoints(center, width, height) {
 
 /**
  * Returns true if convex polygon intersects a circle with the given center and radius.
- * @param {Array<Array<Number,Number>>} poly polygon.
  * @param {Array<Number,Number>} circleCenter circle center.
  * @param {Number} circleRadius circle radius.
+ * @param {Array<Array<Number,Number>>} poly polygon.
  * @returns {Boolean} intersect or not.
  */
 function convexPolyCircleIntersect(circleCenter, circleRadius, poly) {
-  if (util2d.pointInConvexPoly(circleCenter, poly)) return true;
+  let polygon = poly.poly;
 
-  for (let i = 0; i < poly.length; i++) 
-    if (util2d.distToSegment(circleCenter, poly[i], poly[(i + 1) % poly.length]) <= circleRadius)
-      return true;
+  if (isPoint(poly.anchors)) circlesIntersect(circleCenter, circleRadius, poly.anchors[0], 0);
+
+  if (util2d.pointInConvexPoly(circleCenter, polygon) && !isDegenerated(poly.anchors)) return true;
+
+  for (let i = 0; i < polygon.length; i++) 
+    if (util2d.distToSegment(circleCenter, polygon[i], polygon[(i + 1) % polygon.length]) <= circleRadius) return true;
 
   return false;
 }
@@ -331,7 +353,7 @@ function makePts(triangles, rectangles, circles) {
   }
 
   for (let circle of circles) {
-    circle.control = [circle.center[0], circle.center[1] - circle.radius];
+    circle.control = [circle.center[0], circle.center[1] + circle.radius];
     circle.anchors = [circle.center, circle.control];
   }
 }
@@ -443,7 +465,7 @@ function checkTriangleIntersections(triangle, triangles, rectangles, circles) {
       triangle.color = triangle2.color = "red";
 
   for (let circle of circles) 
-    if (convexPolyCircleIntersect(circle.center, circle.radius, triangle.poly)) 
+    if (convexPolyCircleIntersect(circle.center, circle.radius, triangle)) 
       circle.color = triangle.color = "red";
 
   for (let rectangle of rectangles)
@@ -464,7 +486,7 @@ function checkRectangleIntersections(rectangle, triangles, rectangles, circles) 
       rectangle.color = rectangle2.color = "red";
 
   for (let circle of circles) 
-    if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle.poly))
+    if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle))
       circle.color = rectangle.color = "red";
 
   for (let triangle of triangles) 
@@ -485,11 +507,11 @@ function checkCircleIntersections(circle, triangles, rectangles, circles) {
       circle.color = circle2.color = "red";
 
   for (let rectangle of rectangles) 
-    if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle.poly)) 
+    if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle)) 
       circle.color = rectangle.color = "red";
 
   for (let triangle of triangles)
-    if (convexPolyCircleIntersect(circle.center, circle.radius, triangle.poly)) 
+    if (convexPolyCircleIntersect(circle.center, circle.radius, triangle)) 
       circle.color = triangle.color = "red";
 }
 
