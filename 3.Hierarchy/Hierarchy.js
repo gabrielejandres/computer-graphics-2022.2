@@ -4,15 +4,9 @@
  * Summary.
  * <p>Hierarchical Robot object using a matrix stack.</p>
  *
- * @author Paulo Roma
+ * @author Gabriele Jandres Cavalcanti
  * @since 27/09/2016
- * @see https://orion.lcg.ufrj.br/WebGL/labs/WebGL/Assignment_3/Hierarchy.html
- * @see <a href="/WebGL/labs/WebGL/Assignment_3/Hierarchy.js">source</a>
- * @see <a href="/WebGL/labs/WebGL/teal_book/cuon-matrix.js">cuon-matrix</a>
- * @see https://www.cs.ucy.ac.cy/courses/EPL426/courses/eBooks/ComputerGraphicsPrinciplesPractice.pdf#page=188
- * @see https://www.cs.drexel.edu/~david/Classes/ICG/Lectures_new/L-14_HierchModels.pdf
- * @see https://www.lcg.ufrj.br/WebGL/labs/WebGL/Assignment_3/5.hierarchy.pdf
- * @see <img src="../robot.png" width="512">
+ * @see https://gabrielejandres.github.io/computer-graphics-2022.2/3.Hierarchy/Hierarchy.html
  */
 
 "use strict";
