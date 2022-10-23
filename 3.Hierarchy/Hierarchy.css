@@ -20,14 +20,11 @@ body {
   color: var(--color-neutral-lightest);
 }
 
-#container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 3vh;
+p {
+  font-weight: 700;
 }
 
-h2 {
-  margin-bottom: 0;
+canvas {
+  width: 600px;
+  height: 400px;
 }

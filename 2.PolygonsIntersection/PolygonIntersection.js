@@ -462,15 +462,15 @@ function drawCircle(ctx, circle) {
 function checkTriangleIntersections(triangle, triangles, rectangles, circles) {
   for (let triangle2 of triangles)
     if (triangle != triangle2 && convexPolysIntersect(triangle, triangle2)) 
-      triangle.color = triangle2.color = "red";
+      triangle.color = triangle2.color = "#a15a9e";
 
   for (let circle of circles) 
     if (convexPolyCircleIntersect(circle.center, circle.radius, triangle)) 
-      circle.color = triangle.color = "red";
+      circle.color = triangle.color = "#a15a9e";
 
   for (let rectangle of rectangles)
     if (convexPolysIntersect(rectangle, triangle)) 
-      rectangle.color = triangle.color = "red";
+      rectangle.color = triangle.color = "#a15a9e";
 }
 
 /**
@@ -483,15 +483,15 @@ function checkTriangleIntersections(triangle, triangles, rectangles, circles) {
 function checkRectangleIntersections(rectangle, triangles, rectangles, circles) {
   for (let rectangle2 of rectangles)
     if (rectangle != rectangle2 && convexPolysIntersect(rectangle, rectangle2))
-      rectangle.color = rectangle2.color = "red";
+      rectangle.color = rectangle2.color = "#a15a9e";
 
   for (let circle of circles) 
     if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle))
-      circle.color = rectangle.color = "red";
+      circle.color = rectangle.color = "#a15a9e";
 
   for (let triangle of triangles) 
     if (convexPolysIntersect(rectangle, triangle)) 
-      triangle.color = rectangle.color = "red";    
+      triangle.color = rectangle.color = "#a15a9e";    
 }
 
 /**
@@ -504,22 +504,22 @@ function checkRectangleIntersections(rectangle, triangles, rectangles, circles) 
 function checkCircleIntersections(circle, triangles, rectangles, circles) {
   for (let circle2 of circles) 
     if (circle != circle2 && circlesIntersect(circle.center, circle.radius, circle2.center, circle2.radius)) 
-      circle.color = circle2.color = "red";
+      circle.color = circle2.color = "#a15a9e";
 
   for (let rectangle of rectangles) 
     if (convexPolyCircleIntersect(circle.center, circle.radius, rectangle)) 
-      circle.color = rectangle.color = "red";
+      circle.color = rectangle.color = "#a15a9e";
 
   for (let triangle of triangles)
     if (convexPolyCircleIntersect(circle.center, circle.radius, triangle)) 
-      circle.color = triangle.color = "red";
+      circle.color = triangle.color = "#a15a9e";
 }
 
 /**
  * Demo: Test of intersection between convex polygons and circles.
  *
  * Interactively move the anchor points to change the configuration of triangles, squares and circles.
- * If there is an intersection, the drawing will be red, otherwise, black.
+ * If there is an intersection, the drawing will be purple, otherwise, black.
  *
  * @name polygonsDemo
  * @function
@@ -532,21 +532,21 @@ function checkCircleIntersections(circle, triangles, rectangles, circles) {
 
   // Create triangles, rectangles and circles initialized with default values. If you want to add more polygons, you can use that structure and define a new polygon
   const triangles = [
-    { basePoint: [100, 100], oppositeVertex: [100, 50], color: "black" },
-    { basePoint: [250, 100], oppositeVertex: [250, 50], color: "black" },
-    { basePoint: [400, 100], oppositeVertex: [400, 50], color: "black" },
+    { basePoint: [100, 100], oppositeVertex: [100, 50], color: "#333333" },
+    { basePoint: [250, 100], oppositeVertex: [250, 50], color: "#333333" },
+    { basePoint: [400, 100], oppositeVertex: [400, 50], color: "#333333" },
   ];
 
   const rectangles = [
-    { center: [100, 230], width: 50, height: 80, color: "black" },
-    { center: [250, 230], width: 50, height: 80, color: "black" },
-    { center: [400, 230], width: 50, height: 80, color: "black" },
+    { center: [100, 230], width: 50, height: 80, color: "#333333" },
+    { center: [250, 230], width: 50, height: 80, color: "#333333" },
+    { center: [400, 230], width: 50, height: 80, color: "#333333" },
   ];
 
   const circles = [
-    { center: [100, 410], radius: 50, color: "black" },
-    { center: [250, 410], radius: 50, color: "black" },
-    { center: [400, 410], radius: 50, color: "black" },
+    { center: [100, 410], radius: 50, color: "#333333" },
+    { center: [250, 410], radius: 50, color: "#333333" },
+    { center: [400, 410], radius: 50, color: "#333333" },
   ];
 
   makePts(triangles, rectangles, circles);
@@ -556,19 +556,19 @@ function checkCircleIntersections(circle, triangles, rectangles, circles) {
     updateInfo(triangles, rectangles, circles);
 
     for (let triangle of triangles) {
-      triangle.color = "black"; // reset triangle color
+      triangle.color = "#333333"; // reset triangle color
       checkTriangleIntersections(triangle, triangles, rectangles, circles);
       drawTriangle(ctx, triangle);
     }
 
     for (let rectangle of rectangles) {
-      rectangle.color = "black"; // reset rectangle color
+      rectangle.color = "#333333"; // reset rectangle color
       checkRectangleIntersections(rectangle, triangles, rectangles, circles);
       drawRectangle(ctx, rectangle);
     }
 
     for (let circle of circles) {
-      circle.color = "black"; // reset circle color
+      circle.color = "#333333"; // reset circle color
       checkCircleIntersections(circle, triangles, rectangles, circles);
       drawCircle(ctx, circle);
     }

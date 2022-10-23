@@ -3,14 +3,14 @@
  *
  * Summary.
  *
- * Square with different colors at each vertex that rotates counterclockwise around the red vertex
+ * Square with different colors at each vertex that rotates counterclockwise around the purple vertex
  * at a rate of two degrees per frame.
  *
  * When a key is pressed, the square starts to rotate around a different vertex depending on which key is pressed:
- * -> 'g' for the green corner
- * -> 'b' for the blue corner
- * -> 'w' for the white corner
- * -> 'r ' to the red corner
+ * -> 'g' for the gray corner
+ * -> 'y' for the yellow corner
+ * -> 'l' for the lilac corner
+ * -> 'p ' to the purple corner
  *
  * @author Gabriele Jandres Cavalcanti
  * @since 06/09/2022
@@ -89,7 +89,7 @@ function getVertex(i) {
  *
  * @param {CanvasRenderingContext2D} ctx canvas context.
  * @param {Number} angle rotation angle in degrees. If you want a counterclockwise rotation, you have to provide negative values.
- * @param {Number} vertexIndex optional param that indicates fixed vertex in square rotation. The default vertex is the red one.
+ * @param {Number} vertexIndex optional param that indicates fixed vertex in square rotation. The default vertex is the purple one.
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
  */
@@ -100,16 +100,16 @@ function draw(ctx, angle, vertexIndex = 5) {
   let [x, y] = mapToViewport(...getVertex(vertexIndex).map((x) => x)); // The coordinates of the given vertex
 
   // Draw background
-  ctx.fillStyle = "rgba(0, 204, 204, 1)";
+  ctx.fillStyle = "#f2f2f2";
   ctx.rect(0, 0, w, h);
   ctx.fill();
 
   // JSON that maps vertices indexes to colors
   let colorByIndex = {
-    5: "red",
-    2: "white",
-    1: "blue",
-    0: "green",
+    5: "#480048", // purple -> purple
+    2: "#a15a9e", // lilac -> lilac
+    1: "#fab950", // yellow -> yellow
+    0: "#333333", // gray -> gray
   };
 
   // Create gradients according to vertices indexes
@@ -121,8 +121,8 @@ function draw(ctx, angle, vertexIndex = 5) {
       160 + squareSize,
       160 + squareSize
     );
-    gradient.addColorStop(0, colorByIndex[5]); // Red
-    gradient.addColorStop(1, colorByIndex[1]); // Blue
+    gradient.addColorStop(0, colorByIndex[5]); // purple
+    gradient.addColorStop(1, colorByIndex[1]); // yellow
   } else {
     // Create a rotated linear gradient
     gradient = ctx.createLinearGradient(
@@ -131,9 +131,9 @@ function draw(ctx, angle, vertexIndex = 5) {
       160 + squareSize,
       160 + Math.sin(-Math.PI / 2) * squareSize
     );
-    gradient.addColorStop(0, colorByIndex[0]); // Green
-    gradient.addColorStop(0.5, colorByIndex[2]); // White
-    gradient.addColorStop(1, colorByIndex[2]); // White
+    gradient.addColorStop(0, colorByIndex[0]); // gray
+    gradient.addColorStop(0.5, colorByIndex[2]); // lilac
+    gradient.addColorStop(1, colorByIndex[2]); // lilac
   }
 
   // Draw square
@@ -175,7 +175,7 @@ function draw(ctx, angle, vertexIndex = 5) {
  * Entry point when page is loaded.
  *
  * Basically this function does setup that "should" only have to be done once,
- * while draw() does things that have to be repeated each time the canvas is redrawn.
+ * while draw() does things that have to be repeated each time the canvas is purplerawn.
  */
 function mainEntrance() {
   // Retrieve <canvas> element
@@ -189,20 +189,20 @@ function mainEntrance() {
   // Listener to capture keyboard events
   document.addEventListener("keydown", (event) => {
     switch (event.code) {
-      case "KeyR":
-        console.log(event.key, "was pressed"); // Indicates in console that R or r was pressed
+      case "KeyP":
+        console.log(event.key, "was pressed"); // Indicates in console that P or p was pressed
         vertexIndex = 5;
         break;
       case "KeyG":
         console.log(event.key, "was pressed"); // Indicates in console that G or g was pressed
         vertexIndex = 0;
         break;
-      case "KeyB":
-        console.log(event.key, "was pressed"); // Indicates in console that B or b was pressed
+      case "KeyY":
+        console.log(event.key, "was pressed"); // Indicates in console that Y or y was pressed
         vertexIndex = 1;
         break;
-      case "KeyW":
-        console.log(event.key, "was pressed"); // Indicates in console that W or w was pressed
+      case "KeyL":
+        console.log(event.key, "was pressed"); // Indicates in console that L or l was pressed
         vertexIndex = 2;
         break;
     }
