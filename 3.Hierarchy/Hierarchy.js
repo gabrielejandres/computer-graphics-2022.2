@@ -237,7 +237,6 @@ var armAngle = 0.0;
 var handAngle = 0.0;
 var headAngle = 0.0;
 var legAngle = 0.0;
-var leg2Angle = 0.0;
 
 var torsoMatrixLocal = new Matrix4().setScale(10, 10, 5);
 var shoulderMatrixLocal = new Matrix4().setScale(3, 5, 2);
@@ -304,6 +303,7 @@ function handleKeyPress(event) {
         .rotate(-shoulderAngle, 1, 0, 0)
         .translate(0, -2, 0);
       rightShoulderMatrix.setTranslate(6.5, 2, 0).multiply(currentShoulderRot);
+      leftShoulderMatrix.setTranslate(-6.5, 2, 0).multiply(currentShoulderRot);
       break;
     case "S":
       shoulderAngle -= 15;
@@ -312,6 +312,7 @@ function handleKeyPress(event) {
         .rotate(-shoulderAngle, 1, 0, 0)
         .translate(0, -2, 0);
       rightShoulderMatrix.setTranslate(6.5, 2, 0).multiply(currentShoulderRot);
+      leftShoulderMatrix.setTranslate(-6.5, 2, 0).multiply(currentShoulderRot);
       break;
     case "a":
       armAngle += 15;
@@ -321,6 +322,7 @@ function handleKeyPress(event) {
         .rotate(-armAngle, 1, 0, 0)
         .translate(0, -2.5, -1.0);
       rightArmMatrix.setTranslate(0, -5, 0).multiply(currentArm);
+      leftArmMatrix.setTranslate(0, -5, 0).multiply(currentArm);
       break;
     case "A":
       armAngle -= 15;
@@ -329,14 +331,17 @@ function handleKeyPress(event) {
         .rotate(-armAngle, 1, 0, 0)
         .translate(0, -2.5, -1.0);
       rightArmMatrix.setTranslate(0, -5, 0).multiply(currentArm);
+      leftArmMatrix.setTranslate(0, -5, 0).multiply(currentArm);
       break;
     case "h":
       handAngle += 15;
       rightHandMatrix.setTranslate(0, -4, 0).rotate(handAngle, 0, 1, 0);
+      leftHandMatrix.setTranslate(0, -4, 0).rotate(handAngle, 0, 1, 0);
       break;
     case "H":
       handAngle -= 15;
       rightHandMatrix.setTranslate(0, -4, 0).rotate(handAngle, 0, 1, 0);
+      leftHandMatrix.setTranslate(0, -4, 0).rotate(handAngle, 0, 1, 0);
       break;
     case "l":
       headAngle += 15;
