@@ -234,6 +234,12 @@ var leftLegMatrix = new Matrix4().setTranslate(-2, -7, 0);
 var rightFootMatrix = new Matrix4().setTranslate(0, -4, 0);
 /**  @type {Matrix4} */
 var leftFootMatrix = new Matrix4().setTranslate(0, -4, 0);
+/**  @type {Matrix4} */
+var rightEyeMatrix = new Matrix4().setTranslate(1, 1, 2);
+/**  @type {Matrix4} */
+var leftEyeMatrix = new Matrix4().setTranslate(-1, 1, 2);
+/**  @type {Matrix4} */
+var mouthMatrix = new Matrix4().setTranslate(0, -0.75, 2);
 
 var torsoAngle = 0.0;
 var shoulderAngle = 0.0;
@@ -250,6 +256,8 @@ var handMatrixLocal = new Matrix4().setScale(1, 3, 3);
 var headMatrixLocal = new Matrix4().setScale(4, 4, 4);
 var legMatrixLocal = new Matrix4().setScale(1, 8, 2);
 var footMatrixLocal = new Matrix4().setScale(2, 1, 4);
+var eyeMatrixLocal = new Matrix4().setScale(0.7, 0.7, -0.25);
+var mouthMatrixLocal = new Matrix4().setScale(2.5, 0.5, -0.25);
 
 /**
  * View matrix.
@@ -389,8 +397,9 @@ function handleKeyPress(event) {
  * on top of the stack and the given local transformation.
  * @param {Matrix4} matrixStack matrix on top of the stack;
  * @param {Matrix4} matrixLocal local transformation.
+ * @param {String} color color of the cube
  */
-function renderCube(matrixStack, matrixLocal) {
+function renderCube(matrixStack, matrixLocal, color = "") {
   // bind the shader
   gl.useProgram(lightingShader);
 
@@ -422,7 +431,7 @@ function renderCube(matrixStack, matrixLocal) {
   loc = gl.getUniformLocation(lightingShader, "projection");
   gl.uniformMatrix4fv(loc, false, projection.elements);
   loc = gl.getUniformLocation(lightingShader, "u_Color");
-  gl.uniform4f(loc, 0.0, 1.0, 0.0, 1.0);
+  color != "black" ? gl.uniform4f(loc, 0.5, 0, 0.6, 1.0) : gl.uniform4f(loc, 0, 0, 0, 1.0);
   var loc = gl.getUniformLocation(lightingShader, "lightPosition");
   gl.uniform4f(loc, 5.0, 10.0, 5.0, 1.0);
 
@@ -508,6 +517,21 @@ function draw() {
   // head relative to torso
   s.push(new Matrix4(s.top()).multiply(headMatrix));
   renderCube(s, headMatrixLocal);
+
+  // right eye relative to head
+  s.push(new Matrix4(s.top()).multiply(rightEyeMatrix));
+  renderCube(s, eyeMatrixLocal, "black");
+  s.pop();
+
+  // left eye relative to head
+  s.push(new Matrix4(s.top()).multiply(leftEyeMatrix));
+  renderCube(s, eyeMatrixLocal, "black");
+  s.pop();
+
+  // mouth relative to head
+  s.push(new Matrix4(s.top()).multiply(mouthMatrix));
+  renderCube(s, mouthMatrixLocal, "black");
+  s.pop();
   s.pop();
   s.pop();
 
