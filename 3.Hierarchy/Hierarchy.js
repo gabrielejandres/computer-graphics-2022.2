@@ -235,11 +235,15 @@ var rightFootMatrix = new Matrix4().setTranslate(0, -4, 0);
 /**  @type {Matrix4} */
 var leftFootMatrix = new Matrix4().setTranslate(0, -4, 0);
 /**  @type {Matrix4} */
-var rightEyeMatrix = new Matrix4().setTranslate(1, 1, 2);
+var rightEyeMatrix = new Matrix4().setTranslate(1, 0.8, 2);
 /**  @type {Matrix4} */
-var leftEyeMatrix = new Matrix4().setTranslate(-1, 1, 2);
+var leftEyeMatrix = new Matrix4().setTranslate(-1, 0.8, 2);
 /**  @type {Matrix4} */
 var mouthMatrix = new Matrix4().setTranslate(0, -0.75, 2);
+/**  @type {Matrix4} */
+var rightEyebrowMatrix = new Matrix4().setTranslate(1, 1.5, 2);
+/**  @type {Matrix4} */
+var leftEyebrowMatrix = new Matrix4().setTranslate(-1, 1.5, 2);
 
 var torsoAngle = 0.0;
 var shoulderAngle = 0.0;
@@ -258,6 +262,7 @@ var legMatrixLocal = new Matrix4().setScale(1, 8, 2);
 var footMatrixLocal = new Matrix4().setScale(2, 1, 4);
 var eyeMatrixLocal = new Matrix4().setScale(0.7, 0.7, -0.25);
 var mouthMatrixLocal = new Matrix4().setScale(2.5, 0.5, -0.25);
+var eyebrowMatrixLocal = new Matrix4().setScale(1, 0.1, -0.25);
 
 /**
  * View matrix.
@@ -526,6 +531,16 @@ function draw() {
   // left eye relative to head
   s.push(new Matrix4(s.top()).multiply(leftEyeMatrix));
   renderCube(s, eyeMatrixLocal, "black");
+  s.pop();
+
+  // right eyebrow relative to head
+  s.push(new Matrix4(s.top()).multiply(rightEyebrowMatrix));
+  renderCube(s, eyebrowMatrixLocal, "black");
+  s.pop();
+
+  // left eyebrow relative to head
+  s.push(new Matrix4(s.top()).multiply(leftEyebrowMatrix));
+  renderCube(s, eyebrowMatrixLocal, "black");
   s.pop();
 
   // mouth relative to head
