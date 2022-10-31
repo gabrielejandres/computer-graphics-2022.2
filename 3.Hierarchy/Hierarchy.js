@@ -5,7 +5,7 @@
  * <p>Hierarchical Robot object using a matrix stack.</p>
  *
  * @author Gabriele Jandres Cavalcanti
- * @since 27/09/2016
+ * @since 17/10/2022
  * @see https://gabrielejandres.github.io/computer-graphics-2022.2/3.Hierarchy/Hierarchy.html
  */
 
@@ -72,6 +72,13 @@ class Stack {
     return this.t <= 0;
   }
 }
+
+/**
+ * A simpleRotator object to enable rotation by mouse dragging.
+ * Provides the view transform that is applied to both skybox and teapot.
+ * @type {SimpleRotator}
+ */
+ var rotator;
 
 /**
  * <p>Creates data for vertices, colors, and normal vectors for
@@ -227,13 +234,17 @@ var leftHandMatrix = new Matrix4().setTranslate(0, -4, 0);
 /**  @type {Matrix4} */
 var headMatrix = new Matrix4().setTranslate(0, 7, 0);
 /**  @type {Matrix4} */
-var rightLegMatrix = new Matrix4().setTranslate(2, -7, 0);
+var rightLegMatrix = new Matrix4().setTranslate(2, -6.5, 0);
 /**  @type {Matrix4} */
-var leftLegMatrix = new Matrix4().setTranslate(-2, -7, 0);
+var rightLowerLegMatrix = new Matrix4().setTranslate(0, -3.5, 0);
 /**  @type {Matrix4} */
-var rightFootMatrix = new Matrix4().setTranslate(0, -4, 0);
+var leftLegMatrix = new Matrix4().setTranslate(-2, -6.5, 0);
 /**  @type {Matrix4} */
-var leftFootMatrix = new Matrix4().setTranslate(0, -4, 0);
+var leftLowerLegMatrix = new Matrix4().setTranslate(0, -3.5, 0);
+/**  @type {Matrix4} */
+var rightFootMatrix = new Matrix4().setTranslate(0, -2, 0);
+/**  @type {Matrix4} */
+var leftFootMatrix = new Matrix4().setTranslate(0, -2, 0);
 /**  @type {Matrix4} */
 var rightEyeMatrix = new Matrix4().setTranslate(1, 0.8, 2);
 /**  @type {Matrix4} */
@@ -251,14 +262,16 @@ var armAngle = 0.0;
 var handAngle = 0.0;
 var headAngle = 0.0;
 var legAngle = 0.0;
+var lowerLegAngle = 0.0;
 var footAngle = 0.0;
 
-var torsoMatrixLocal = new Matrix4().setScale(10, 10, 5);
+var torsoMatrixLocal = new Matrix4().setScale(10, 10.5, 5);
 var shoulderMatrixLocal = new Matrix4().setScale(3, 5, 2);
 var armMatrixLocal = new Matrix4().setScale(3, 5, 2);
 var handMatrixLocal = new Matrix4().setScale(1, 3, 3);
-var headMatrixLocal = new Matrix4().setScale(5, 4, 4);
-var legMatrixLocal = new Matrix4().setScale(1, 8, 2);
+var headMatrixLocal = new Matrix4().setScale(5, 3.5, 4);
+var legMatrixLocal = new Matrix4().setScale(2, 3.5, 2);
+var lowerLegMatrixLocal = new Matrix4().setScale(2, 4, 2);
 var footMatrixLocal = new Matrix4().setScale(2, 1, 4);
 var eyeMatrixLocal = new Matrix4().setScale(0.7, 0.7, -0.25);
 var mouthMatrixLocal = new Matrix4().setScale(2.5, 0.5, -0.25);
@@ -372,21 +385,40 @@ function handleKeyPress(event) {
       break;
     case "e":
       legAngle += 15;
+      // rotate leg clockwise about a point 1 unit above its center
       var currentLegRot = new Matrix4()
-        .setTranslate(0, 4, 0)
+        .setTranslate(0, 1, 0)
         .rotate(-legAngle, 1, 0, 0)
-        .translate(0, -4, 0);
-      rightLegMatrix.setTranslate(2, -8, 0).multiply(currentLegRot);
-      leftLegMatrix.setTranslate(-2, -8, 0).multiply(currentLegRot);
+        .translate(0, -1, 0);
+      rightLegMatrix.setTranslate(2, -6, 0).multiply(currentLegRot);
+      leftLegMatrix.setTranslate(-2, -6, 0).multiply(currentLegRot);
       break;
     case "E":
       legAngle -= 15;
       var currentLegRot = new Matrix4()
-        .setTranslate(0, 4, 0)
+        .setTranslate(0, 1, 0)
         .rotate(-legAngle, 1, 0, 0)
-        .translate(0, -4, 0);
-      rightLegMatrix.setTranslate(2, -8, 0).multiply(currentLegRot);
-      leftLegMatrix.setTranslate(-2, -8, 0).multiply(currentLegRot);
+        .translate(0, -1, 0);
+      rightLegMatrix.setTranslate(2, -7, 0).multiply(currentLegRot);
+      leftLegMatrix.setTranslate(-2, -7, 0).multiply(currentLegRot);
+      break;
+    case "w":
+      lowerLegAngle += 15;
+      var currentLowerLeg = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-lowerLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      rightLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLowerLeg);
+      leftLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLowerLeg);
+      break;
+    case "W":
+      lowerLegAngle -= 15;
+      var currentLowerLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-lowerLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      rightLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLowerLegRot);
+      leftLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLowerLegRot);
       break;
     default:
       return;
@@ -464,6 +496,8 @@ function draw() {
   // clear the framebuffer
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BIT);
 
+  view.elements = rotator.getViewMatrix();
+
   // set up the matrix stack
   var s = new Stack();
   s.push(torsoMatrix);
@@ -473,9 +507,14 @@ function draw() {
   s.push(new Matrix4(s.top()).multiply(rightLegMatrix));
   renderCube(s, legMatrixLocal);
 
+  // right lower leg relative to torso
+  s.push(new Matrix4(s.top()).multiply(rightLowerLegMatrix));
+  renderCube(s, lowerLegMatrixLocal);
+
   // right foot relative to leg
   s.push(new Matrix4(s.top()).multiply(rightFootMatrix));
   renderCube(s, footMatrixLocal);
+  s.pop();
   s.pop();
   s.pop();
 
@@ -483,9 +522,14 @@ function draw() {
   s.push(new Matrix4(s.top()).multiply(leftLegMatrix));
   renderCube(s, legMatrixLocal);
 
+  // left lower leg relative to torso
+  s.push(new Matrix4(s.top()).multiply(leftLowerLegMatrix));
+  renderCube(s, lowerLegMatrixLocal);
+
   // left foot relative to leg
   s.push(new Matrix4(s.top()).multiply(leftFootMatrix));
   renderCube(s, footMatrixLocal);
+  s.pop();
   s.pop();
   s.pop();
 
@@ -570,6 +614,13 @@ function draw() {
 window.addEventListener("load", (event) => {
   // retrieve <canvas> element
   var canvas = document.getElementById("theCanvas");
+
+  // rotator = new SimpleRotator(canvas, draw);
+  rotator = new SimpleRotator(canvas);
+  rotator.setView([0, 0, 1], [0, 1, 0], 40);
+  rotator.lightingShader = lightingShader; // for lighting
+  rotator.draw = draw; // for lighting
+
 
   // key handler
   window.onkeypress = handleKeyPress;

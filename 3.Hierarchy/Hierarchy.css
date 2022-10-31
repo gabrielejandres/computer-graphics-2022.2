@@ -11,13 +11,16 @@
 
 body {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   background: var(--color-neutral-darkest);
   font-family: "Poppins", sans-serif;
   color: var(--color-neutral-lightest);
+}
+
+#options {
+  display: none;
 }
 
 .control {
@@ -27,11 +30,6 @@ body {
   max-width: 600px;
   margin: 0 auto;
   padding: 0 1rem;
-}
-
-.control p {
-  margin-bottom: 2px;
-  font-size: 1.3em;
 }
 
 ul {
