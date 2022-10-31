@@ -684,7 +684,7 @@ function renderCube(matrixStack, matrixLocal, color = "") {
   loc = gl.getUniformLocation(lightingShader, "u_Color");
   color != "black" ? gl.uniform4f(loc, 0.5, 0, 0.6, 1.0) : gl.uniform4f(loc, 0, 0, 0, 1.0);
   var loc = gl.getUniformLocation(lightingShader, "lightPosition");
-  gl.uniform4f(loc, 5.0, 10.0, 5.0, 1.0);
+  gl.uniform4f(loc, 2.0, 8.0, 10.0, 1.0);
 
   var modelMatrixloc = gl.getUniformLocation(lightingShader, "model");
   var normalMatrixLoc = gl.getUniformLocation(lightingShader, "normalMatrix");
@@ -829,12 +829,8 @@ window.addEventListener("load", (event) => {
   // retrieve <canvas> element
   var canvas = document.getElementById("theCanvas");
 
-  // rotator = new SimpleRotator(canvas, draw);
   rotator = new SimpleRotator(canvas);
   rotator.setView([0, 0, 1], [0, 1, 0], 40);
-  rotator.lightingShader = lightingShader; // for lighting
-  rotator.draw = draw; // for lighting
-
 
   // key handler
   window.onkeypress = handleKeyPress;

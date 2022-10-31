@@ -59,7 +59,7 @@
       void main()
       {
         float ambientFactor = 0.3;
-        vec3 lightDirection = normalize((view * lightPosition - view * model * a_Position).xyz);
+        vec3 lightDirection = normalize((lightPosition - model * a_Position).xyz);
         //vec3 normal = (view * model * vec4(a_Normal, 0.0)).xyz;
         vec3 normal = normalize(normalMatrix * a_Normal);
         float diffuseFactor = max(0.0, dot(lightDirection, normal));
