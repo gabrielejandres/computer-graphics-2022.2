@@ -19,6 +19,20 @@ body {
   color: var(--color-neutral-lightest);
 }
 
+.robot {
+  margin-left: 7%;
+}
+
+.robot h1 {
+  text-align: center;
+  margin-top: -2%;
+}
+
+.robot p {
+  text-align: center;
+  font-weight: 400;
+}
+
 #options {
   display: none;
 }
@@ -30,6 +44,8 @@ body {
   max-width: 600px;
   margin: 0 auto;
   padding: 0 1rem;
+  margin-top: 1%;
+  margin-left: 5%;
 }
 
 ul {

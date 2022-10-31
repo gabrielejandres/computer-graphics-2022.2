@@ -257,13 +257,22 @@ var rightEyebrowMatrix = new Matrix4().setTranslate(1, 1.5, 2);
 var leftEyebrowMatrix = new Matrix4().setTranslate(-1, 1.5, 2);
 
 var torsoAngle = 0.0;
-var shoulderAngle = 0.0;
-var armAngle = 0.0;
-var handAngle = 0.0;
 var headAngle = 0.0;
-var legAngle = 0.0;
-var lowerLegAngle = 0.0;
-var footAngle = 0.0;
+// var shoulderAngle = 0.0;
+var rightShoulderAngle = 0.0;
+var leftShoulderAngle = 0.0;
+// var armAngle = 0.0;
+var rightArmAngle = 0.0;
+var leftArmAngle = 0.0;
+// var handAngle = 0.0;
+var rightHandAngle = 0.0;
+var leftHandAngle = 0.0;
+// var legAngle = 0.0;
+var rightLegAngle = 0.0;
+var leftLegAngle = 0.0;
+// var lowerLegAngle = 0.0;
+var rightLowerLegAngle = 0.0;
+var leftLowerLegAngle = 0.0;
 
 var torsoMatrixLocal = new Matrix4().setScale(10, 10.5, 5);
 var shoulderMatrixLocal = new Matrix4().setScale(3, 5, 2);
@@ -327,54 +336,6 @@ function handleKeyPress(event) {
       torsoAngle -= 15;
       torsoMatrix.setTranslate(0, 0, 0).rotate(torsoAngle, 0, 1, 0);
       break;
-    case "s":
-      shoulderAngle += 15;
-      // rotate shoulder clockwise about a point 2 units above its center
-      var currentShoulderRot = new Matrix4()
-        .setTranslate(0, 2, 0)
-        .rotate(-shoulderAngle, 1, 0, 0)
-        .translate(0, -2, 0);
-      rightShoulderMatrix.setTranslate(6.5, 2, 0).multiply(currentShoulderRot);
-      leftShoulderMatrix.setTranslate(-6.5, 2, 0).multiply(currentShoulderRot);
-      break;
-    case "S":
-      shoulderAngle -= 15;
-      var currentShoulderRot = new Matrix4()
-        .setTranslate(0, 2, 0)
-        .rotate(-shoulderAngle, 1, 0, 0)
-        .translate(0, -2, 0);
-      rightShoulderMatrix.setTranslate(6.5, 2, 0).multiply(currentShoulderRot);
-      leftShoulderMatrix.setTranslate(-6.5, 2, 0).multiply(currentShoulderRot);
-      break;
-    case "a":
-      armAngle += 15;
-      // rotate arm clockwise about its top front corner
-      var currentArm = new Matrix4()
-        .setTranslate(0, 2.5, 1.0)
-        .rotate(-armAngle, 1, 0, 0)
-        .translate(0, -2.5, -1.0);
-      rightArmMatrix.setTranslate(0, -5, 0).multiply(currentArm);
-      leftArmMatrix.setTranslate(0, -5, 0).multiply(currentArm);
-      break;
-    case "A":
-      armAngle -= 15;
-      var currentArm = new Matrix4()
-        .setTranslate(0, 2.5, 1.0)
-        .rotate(-armAngle, 1, 0, 0)
-        .translate(0, -2.5, -1.0);
-      rightArmMatrix.setTranslate(0, -5, 0).multiply(currentArm);
-      leftArmMatrix.setTranslate(0, -5, 0).multiply(currentArm);
-      break;
-    case "h":
-      handAngle += 15;
-      rightHandMatrix.setTranslate(0, -4, 0).rotate(handAngle, 0, 1, 0);
-      leftHandMatrix.setTranslate(0, -4, 0).rotate(handAngle, 0, 1, 0);
-      break;
-    case "H":
-      handAngle -= 15;
-      rightHandMatrix.setTranslate(0, -4, 0).rotate(handAngle, 0, 1, 0);
-      leftHandMatrix.setTranslate(0, -4, 0).rotate(handAngle, 0, 1, 0);
-      break;
     case "l":
       headAngle += 15;
       headMatrix.setTranslate(0, 7, 0).rotate(headAngle, 0, 1, 0);
@@ -383,42 +344,295 @@ function handleKeyPress(event) {
       headAngle -= 15;
       headMatrix.setTranslate(0, 7, 0).rotate(headAngle, 0, 1, 0);
       break;
+    case "s":
+      // right shoulder
+      rightShoulderAngle += 15;
+      var currentRightShoulderRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-rightShoulderAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      rightShoulderMatrix.setTranslate(6.5, 2, 0).multiply(currentRightShoulderRot);
+      // left shoulder
+      leftShoulderAngle += 15;
+      var currentLeftShoulderRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-leftShoulderAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      leftShoulderMatrix.setTranslate(-6.5, 2, 0).multiply(currentLeftShoulderRot);
+      break;
+    case "S":
+      // right shoulder
+      rightShoulderAngle -= 15;
+      var currentRightShoulderRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-rightShoulderAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      rightShoulderMatrix.setTranslate(6.5, 2, 0).multiply(currentRightShoulderRot);
+      // left shoulder
+      leftShoulderAngle -= 15;
+      var currentLeftShoulderRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-leftShoulderAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      leftShoulderMatrix.setTranslate(-6.5, 2, 0).multiply(currentLeftShoulderRot);
+      break;
+    case "r":
+      rightShoulderAngle += 15;
+      // rotate shoulder clockwise about a point 2 units above its center
+      var currentShoulderRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-rightShoulderAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      rightShoulderMatrix.setTranslate(6.5, 2, 0).multiply(currentShoulderRot);
+      break;
+    case "R":
+      rightShoulderAngle -= 15;
+      var currentShoulderRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-rightShoulderAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      rightShoulderMatrix.setTranslate(6.5, 2, 0).multiply(currentShoulderRot);
+      break;
+    case "o":
+      leftShoulderAngle += 15;
+      // rotate shoulder clockwise about a point 2 units above its center
+      var currentShoulderRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-leftShoulderAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      leftShoulderMatrix.setTranslate(-6.5, 2, 0).multiply(currentShoulderRot);
+      break;
+    case "O":
+      leftShoulderAngle -= 15;
+      var currentShoulderRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-leftShoulderAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      leftShoulderMatrix.setTranslate(-6.5, 2, 0).multiply(currentShoulderRot);
+      break;
+    case "a":
+      // right arm
+      rightArmAngle += 15;
+      var currentRightArmRot = new Matrix4()
+        .setTranslate(0, 2.5, 0)
+        .rotate(-rightArmAngle, 1, 0, 0)
+        .translate(0, -2.5, 0);
+      rightArmMatrix.setTranslate(0, -5, 0).multiply(currentRightArmRot);
+      // left arm
+      leftArmAngle += 15;
+      var currentLeftArmRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-leftArmAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      leftArmMatrix.setTranslate(0, -5, 0).multiply(currentLeftArmRot);
+      break;
+    case "A":
+      // right arm
+      rightArmAngle -= 15;
+      var currentRightArmRot = new Matrix4()
+        .setTranslate(0, 2.5, 0)
+        .rotate(-rightArmAngle, 1, 0, 0)
+        .translate(0, -2.5, 0);
+      rightArmMatrix.setTranslate(0, -5, 0).multiply(currentRightArmRot);
+      // left arm
+      leftArmAngle -= 15;
+      var currentLeftArmRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-leftArmAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      leftArmMatrix.setTranslate(0, -5, 0).multiply(currentLeftArmRot);
+      break;
+    case "m":
+      rightArmAngle += 15;
+      var currentRightArmRot = new Matrix4()
+        .setTranslate(0, 2.5, 0)
+        .rotate(-rightArmAngle, 1, 0, 0)
+        .translate(0, -2.5, 0);
+      rightArmMatrix.setTranslate(0, -5, 0).multiply(currentRightArmRot);
+      break;
+    case "M":
+      rightArmAngle -= 15;
+      var currentRightArmRot = new Matrix4()
+        .setTranslate(0, 2.5, 0)
+        .rotate(-rightArmAngle, 1, 0, 0)
+        .translate(0, -2.5, 0);
+      rightArmMatrix.setTranslate(0, -5, 0).multiply(currentRightArmRot);
+      break;
+    case "n":
+      leftArmAngle += 15;
+      var currentLeftArmRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-leftArmAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      leftArmMatrix.setTranslate(0, -5, 0).multiply(currentLeftArmRot);
+      break;
+    case "N":
+      leftArmAngle -= 15;
+      var currentLeftArmRot = new Matrix4()
+        .setTranslate(0, 2, 0)
+        .rotate(-leftArmAngle, 1, 0, 0)
+        .translate(0, -2, 0);
+      leftArmMatrix.setTranslate(0, -5, 0).multiply(currentLeftArmRot);
+      break;
+    case "h":
+      // right hand 
+      rightHandAngle += 15;
+      rightHandMatrix.setTranslate(0, -4, 0).rotate(rightHandAngle, 0, 1, 0);
+      // left hand
+      leftHandAngle += 15;
+      leftHandMatrix.setTranslate(0, -4, 0).rotate(rightHandAngle, 0, 1, 0);
+      break;
+    case "H":
+      // right hand 
+      rightHandAngle -= 15;
+      rightHandMatrix.setTranslate(0, -4, 0).rotate(leftHandAngle, 0, 1, 0);
+      // left hand
+      leftHandAngle -= 15;
+      leftHandMatrix.setTranslate(0, -4, 0).rotate(leftHandAngle, 0, 1, 0);
+      break;
+    case "g":
+      rightHandAngle += 15;
+      rightHandMatrix.setTranslate(0, -4, 0).rotate(rightHandAngle, 0, 1, 0);
+      break;
+    case "G":
+      rightHandAngle -= 15;
+      rightHandMatrix.setTranslate(0, -4, 0).rotate(rightHandAngle, 0, 1, 0);
+      break;
+    case "i":
+      leftHandAngle += 15;
+      leftHandMatrix.setTranslate(0, -4, 0).rotate(leftHandAngle, 0, 1, 0);
+      break;
+    case "I":
+      leftHandAngle -= 15;
+      leftHandMatrix.setTranslate(0, -4, 0).rotate(leftHandAngle, 0, 1, 0);
+      break;
     case "e":
-      legAngle += 15;
-      // rotate leg clockwise about a point 1 unit above its center
-      var currentLegRot = new Matrix4()
+      // right leg
+      rightLegAngle += 15;
+      var currentRightLegRot = new Matrix4()
         .setTranslate(0, 1, 0)
-        .rotate(-legAngle, 1, 0, 0)
+        .rotate(-rightLegAngle, 1, 0, 0)
         .translate(0, -1, 0);
-      rightLegMatrix.setTranslate(2, -6, 0).multiply(currentLegRot);
-      leftLegMatrix.setTranslate(-2, -6, 0).multiply(currentLegRot);
+      rightLegMatrix.setTranslate(2, -6, 0).multiply(currentRightLegRot);
+      // left leg
+      leftLegAngle += 15;
+      var currentLeftLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-leftLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      leftLegMatrix.setTranslate(-2, -6, 0).multiply(currentLeftLegRot);
       break;
     case "E":
-      legAngle -= 15;
-      var currentLegRot = new Matrix4()
+      // right leg
+      rightLegAngle -= 15;
+      var currentRightLegRot = new Matrix4()
         .setTranslate(0, 1, 0)
-        .rotate(-legAngle, 1, 0, 0)
+        .rotate(-rightLegAngle, 1, 0, 0)
         .translate(0, -1, 0);
-      rightLegMatrix.setTranslate(2, -7, 0).multiply(currentLegRot);
-      leftLegMatrix.setTranslate(-2, -7, 0).multiply(currentLegRot);
+      rightLegMatrix.setTranslate(2, -6, 0).multiply(currentRightLegRot);
+      // left leg
+      leftLegAngle -= 15;
+      var currentLeftLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-leftLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      leftLegMatrix.setTranslate(-2, -6, 0).multiply(currentLeftLegRot);
+      break;
+    case "j":
+      rightLegAngle += 15;
+      var currentRightLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-rightLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      rightLegMatrix.setTranslate(2, -6, 0).multiply(currentRightLegRot);
+      break;
+    case "J":
+      rightLegAngle -= 15;
+      var currentRightLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-rightLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      rightLegMatrix.setTranslate(2, -6, 0).multiply(currentRightLegRot);
+      break;
+    case "k":
+      leftLegAngle += 15;
+      var currentLeftLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-leftLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      leftLegMatrix.setTranslate(-2, -6, 0).multiply(currentLeftLegRot);
+      break;
+    case "K":
+      leftLegAngle -= 15;
+      var currentLeftLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-leftLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      leftLegMatrix.setTranslate(-2, -6, 0).multiply(currentLeftLegRot);
       break;
     case "w":
-      lowerLegAngle += 15;
-      var currentLowerLeg = new Matrix4()
+      // right lower leg
+      rightLowerLegAngle += 15;
+      var currentRightLowerLegRot = new Matrix4()
         .setTranslate(0, 1, 0)
-        .rotate(-lowerLegAngle, 1, 0, 0)
+        .rotate(-rightLowerLegAngle, 1, 0, 0)
         .translate(0, -1, 0);
-      rightLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLowerLeg);
-      leftLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLowerLeg);
+      rightLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentRightLowerLegRot);
+      // left lower leg
+      leftLowerLegAngle += 15;
+      var currentLeftLowerLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-leftLowerLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      leftLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLeftLowerLegRot);
       break;
     case "W":
-      lowerLegAngle -= 15;
-      var currentLowerLegRot = new Matrix4()
+      // right lower leg
+      rightLowerLegAngle -= 15;
+      var currentRightLowerLegRot = new Matrix4()
         .setTranslate(0, 1, 0)
-        .rotate(-lowerLegAngle, 1, 0, 0)
+        .rotate(-rightLowerLegAngle, 1, 0, 0)
         .translate(0, -1, 0);
-      rightLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLowerLegRot);
-      leftLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLowerLegRot);
+      rightLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentRightLowerLegRot);
+      // left lower leg
+      leftLowerLegAngle -= 15;
+      var currentLeftLowerLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-leftLowerLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      leftLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLeftLowerLegRot);
+      break;
+    case "p":
+      rightLowerLegAngle += 15;
+      var currentRightLowerLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-rightLowerLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      rightLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentRightLowerLegRot);
+      break;
+    case "P":
+      rightLowerLegAngle -= 15;
+      var currentRightLowerLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-rightLowerLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      rightLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentRightLowerLegRot);
+      break;
+    case "q":
+      leftLowerLegAngle += 15;
+      var currentLeftLowerLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-leftLowerLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      leftLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLeftLowerLegRot);
+      break;
+    case "Q":
+      leftLowerLegAngle -= 15;
+      var currentLeftLowerLegRot = new Matrix4()
+        .setTranslate(0, 1, 0)
+        .rotate(-leftLowerLegAngle, 1, 0, 0)
+        .translate(0, -1, 0);
+      leftLowerLegMatrix.setTranslate(0, -3.5, 0).multiply(currentLeftLowerLegRot);
       break;
     default:
       return;
